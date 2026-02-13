@@ -1,34 +1,26 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="app-container">
+      <header className="header">
+        <h1>Zone 01 Oujda</h1>
+        <h2>Ramadan Football League 2026</h2>
+      </header>
+      <main className="main-content">
+        <div className="card">
+          <h3>Welcome to the League</h3>
+          <p>Experience the excitement of Ramadan football.</p>
+          <div className="actions">
+            <button className="cta-button">View Matches</button>
+            <button className="secondary-button">Team Standings</button>
+          </div>
+        </div>
+      </main>
+      <footer className="footer">
+        <p>&copy; 2026 Zone 01 Oujda. All rights reserved.</p>
+      </footer>
+    </div>
   )
 }
 
