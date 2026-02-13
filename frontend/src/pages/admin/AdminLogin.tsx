@@ -1,0 +1,84 @@
+
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Lock } from 'lucide-react';
+
+export default function AdminLogin() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+                // Cookie is set by backend
+                // Force reload or update state to reflect auth
+                // For simple cookie auth, backend sets it, we just navigate
+                // We might need to manually set a flag for client-side routing if not using a real auth provider
+                document.cookie = "admin_token=secret-admin-token; path=/"; // Client side backup for the layout check
+                navigate('/admin/dashboard');
+            } else {
+                setError('Invalid credentials');
+            }
+        } catch (err) {
+            setError('Login failed');
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-[#0B0F1C] flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-[#141B2D] p-8 rounded-2xl border border-[#D4A018]/20">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-[#D4A018]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-8 h-8 text-[#D4A018]" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-[#F4F6FA]">Admin Login</h1>
+                    <p className="text-[#A9B3C7]">Zone 01 Football League</p>
+                </div>
+
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                        <label className="block text-sm text-[#A9B3C7] mb-1">Username</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full bg-[#0B0F1C] border border-[#D4A018]/20 rounded-lg px-4 py-2 text-[#F4F6FA] focus:outline-none focus:border-[#D4A018]"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm text-[#A9B3C7] mb-1">Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full bg-[#0B0F1C] border border-[#D4A018]/20 rounded-lg px-4 py-2 text-[#F4F6FA] focus:outline-none focus:border-[#D4A018]"
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-[#D4A018] text-[#0B0F1C] font-bold py-3 rounded-lg hover:bg-[#B38612] transition-colors"
+                    >
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+}
