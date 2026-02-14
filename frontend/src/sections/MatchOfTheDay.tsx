@@ -3,22 +3,27 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Calendar, MapPin, Trophy, ArrowRight } from 'lucide-react';
+import type { BackendTeam, Match as GlobalMatch } from '@/types';
 
-interface Team {
-  id: string;
-  teamName: string;
-  logoPath: string;
-  // Mocking colors/shortName if not in DB yet, or deriving them
-}
-
-interface Match {
-  id: string;
+// Enriched match with full team details
+interface EnrichedMatch extends Omit<GlobalMatch, 'homeTeamId' | 'awayTeamId'> {
   homeTeamId: string;
   awayTeamId: string;
-  date: string;
-  time: string;
-  venue: string;
-  status: string;
+  home: {
+    teamName: string;
+    logoPath: string;
+    colors: { primary: string; secondary: string };
+    shortName: string;
+    cohort: string;
+  };
+  away: {
+    teamName: string;
+    logoPath: string;
+    colors: { primary: string; secondary: string };
+    shortName: string;
+    cohort: string;
+  };
+  stage: string;
 }
 
 export default function MatchOfTheDay() {
@@ -26,7 +31,7 @@ export default function MatchOfTheDay() {
   const { config } = useSiteConfig();
   const { ref } = useScrollReveal<HTMLElement>({ threshold: 0.2 });
 
-  const [match, setMatch] = useState<any>(null);
+  const [match, setMatch] = useState<EnrichedMatch | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,8 +43,8 @@ export default function MatchOfTheDay() {
         ]);
 
         if (matchesRes.ok && teamsRes.ok) {
-          const matches: Match[] = await matchesRes.json();
-          const teams: Team[] = await teamsRes.json();
+          const matches: GlobalMatch[] = await matchesRes.json();
+          const teams: BackendTeam[] = await teamsRes.json();
 
           if (matches.length === 0) {
             setMatch(null);
@@ -47,27 +52,20 @@ export default function MatchOfTheDay() {
             return;
           }
 
-          let selectedMatch: Match | undefined;
+          let selectedMatch: GlobalMatch | undefined;
 
           if (config.autoUpdateMatches) {
-            // Logic: Find first match that is NOT finished, or the next upcoming one
-            // "if time of match current is ended automaticcally passe of next matche"
             const now = new Date();
-
-            // Parse dates and sort
             const sortedMatches = matches.sort((a, b) => {
               return new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime();
             });
 
-            // Find first match in the future (or currently playing theoretically)
-            // Assuming 2 hours duration for a match
             selectedMatch = sortedMatches.find(m => {
               const matchTime = new Date(`${m.date}T${m.time}`);
-              const matchEndTime = new Date(matchTime.getTime() + 2 * 60 * 60 * 1000); // +2 hours
+              const matchEndTime = new Date(matchTime.getTime() + 2 * 60 * 60 * 1000);
               return matchEndTime > now;
             });
 
-            // If all matches finished, show the last one? Or null?
             if (!selectedMatch && sortedMatches.length > 0) {
               selectedMatch = sortedMatches[sortedMatches.length - 1];
             }
@@ -76,27 +74,29 @@ export default function MatchOfTheDay() {
           }
 
           if (selectedMatch) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const homeTeam = teams.find((t: any) => t.id === selectedMatch!.homeTeamId);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const awayTeam = teams.find((t: any) => t.id === selectedMatch!.awayTeamId);
+            const homeTeam = teams.find((t) => t.id === selectedMatch!.homeTeamId);
+            const awayTeam = teams.find((t) => t.id === selectedMatch!.awayTeamId);
 
-            setMatch({
-              ...selectedMatch,
-              home: {
-                ...homeTeam,
-                colors: { primary: '#10B981', secondary: '#ffffff' }, // Fallback colors
-                shortName: homeTeam?.teamName.substring(0, 3).toUpperCase() || 'HOM',
-                cohort: 'Cohort 1'
-              },
-              away: {
-                ...awayTeam,
-                colors: { primary: '#3B82F6', secondary: '#ffffff' }, // Fallback colors
-                shortName: awayTeam?.teamName.substring(0, 3).toUpperCase() || 'AWAY',
-                cohort: 'Cohort 2'
-              },
-              stage: config.matchStage || 'League Match'
-            });
+            if (homeTeam && awayTeam) {
+              setMatch({
+                ...selectedMatch,
+                home: {
+                  teamName: homeTeam.teamName,
+                  logoPath: homeTeam.logoPath,
+                  colors: { primary: '#10B981', secondary: '#ffffff' }, // Fallback logic would normally derive from name/id
+                  shortName: homeTeam.teamName ? homeTeam.teamName.substring(0, 3).toUpperCase() : 'HOM',
+                  cohort: 'Cohort 1'
+                },
+                away: {
+                  teamName: awayTeam.teamName,
+                  logoPath: awayTeam.logoPath,
+                  colors: { primary: '#3B82F6', secondary: '#ffffff' },
+                  shortName: awayTeam.teamName ? awayTeam.teamName.substring(0, 3).toUpperCase() : 'AWAY',
+                  cohort: 'Cohort 2'
+                },
+                stage: config.matchStage || 'League Match'
+              });
+            }
           }
         }
       } catch (error) {
@@ -107,22 +107,20 @@ export default function MatchOfTheDay() {
     };
 
     fetchData();
-    // Set up interval to check every minute if auto-update is on?
-    // For now, just load on mount. User can refresh. 
-    // Or strictly strictly: "automaticcally passe"
-    const interval = setInterval(fetchData, 60000); // Check every minute
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
 
-  }, [config.autoUpdateMatches, config.featuredMatchId]);
+  }, [config.autoUpdateMatches, config.featuredMatchId, config.matchStage]);
 
-  if (!match && !loading) {
+  if (loading) return <div className="min-h-screen bg-[#0B0F1C] flex items-center justify-center text-[#D4A018]">{t('status.loading')} Match...</div>;
+
+  if (!match) {
     return (
       <section className="py-20 text-center text-[#D4A018]">
-        <h2 className="text-2xl font-display font-bold">No Upcoming Matches</h2>
+        <h2 className="text-2xl font-display font-bold">{t('status.no_data')}</h2>
       </section>
     );
   }
-  if (loading) return <div className="min-h-screen bg-[#0B0F1C] flex items-center justify-center text-[#D4A018]">Loading Match...</div>;
 
   return (
     <section
@@ -234,11 +232,11 @@ export default function MatchOfTheDay() {
                 >
                   <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#141B2D]">
                     <Calendar className="w-4 h-4 text-[#D4A018]" />
-                    <span className="text-sm text-[#F4F6FA]">{match.date} • {match.time}</span>
+                    <span className="text-sm text-[#F4F6FA]">{match?.date} • {match?.time}</span>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#141B2D]">
                     <MapPin className="w-4 h-4 text-[#D4A018]" />
-                    <span className="text-sm text-[#F4F6FA]">{match.venue}</span>
+                    <span className="text-sm text-[#F4F6FA]">{match?.venue}</span>
                   </div>
                 </div>
 

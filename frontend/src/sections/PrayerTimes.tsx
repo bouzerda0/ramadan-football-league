@@ -1,13 +1,13 @@
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { usePrayerTimes } from '@/hooks/usePrayerTimes';
+import { usePrayerTimes, useWeather } from '@/hooks/usePrayerTimes';
 import { Moon, Sun, Cloud, Wind, Droplets, Navigation } from 'lucide-react';
-import { weatherData } from '@/data/leagueData';
 
 export default function PrayerTimes() {
   const { t, dir } = useLanguage();
   const { ref, isVisible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
   const { prayerTimes, timeToIftar } = usePrayerTimes();
+  const { weather } = useWeather();
 
   const prayers = [
     { key: 'fajr', icon: <Moon className="w-5 h-5" />, time: prayerTimes.fajr },
@@ -63,7 +63,7 @@ export default function PrayerTimes() {
             >
               <div className="card-gold rounded-3xl p-8">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-display font-bold text-[#F4F6FA]">Today's Schedule</h3>
+                  <h3 className="text-xl font-display font-bold text-[#F4F6FA]">Today&apos;s Schedule</h3>
                   <span className="text-sm text-[#6B7280]">{prayerTimes.date}</span>
                 </div>
 
@@ -134,9 +134,9 @@ export default function PrayerTimes() {
                     <Cloud className="w-12 h-12 text-[#D4A018]" />
                   </div>
                   <p className="text-5xl font-display font-bold text-[#F4F6FA]">
-                    {weatherData.temp}°C
+                    {weather.temp}°C
                   </p>
-                  <p className="text-lg text-[#A9B3C7] mt-2">{weatherData.condition}</p>
+                  <p className="text-lg text-[#A9B3C7] mt-2">{weather.condition}</p>
                 </div>
 
                 <div className="space-y-4">
@@ -145,14 +145,14 @@ export default function PrayerTimes() {
                       <Wind className="w-5 h-5 text-[#A9B3C7]" />
                       <span className="text-[#A9B3C7]">{t('weather.wind')}</span>
                     </div>
-                    <span className="font-semibold text-[#F4F6FA]">{weatherData.wind} km/h</span>
+                    <span className="font-semibold text-[#F4F6FA]">{weather.wind} km/h</span>
                   </div>
                   <div className="flex items-center justify-between p-4 rounded-xl bg-[#141B2D]/50">
                     <div className="flex items-center gap-3">
                       <Droplets className="w-5 h-5 text-[#A9B3C7]" />
                       <span className="text-[#A9B3C7]">{t('weather.humidity')}</span>
                     </div>
-                    <span className="font-semibold text-[#F4F6FA]">{weatherData.humidity}%</span>
+                    <span className="font-semibold text-[#F4F6FA]">{weather.humidity}%</span>
                   </div>
                 </div>
 
@@ -161,7 +161,7 @@ export default function PrayerTimes() {
                   <div className="flex items-start gap-3">
                     <Navigation className="w-5 h-5 text-[#10B981] flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-[#A9B3C7]">
-                      Perfect conditions for tonight's matches. All games will proceed as scheduled.
+                      Perfect conditions for tonight&apos;s matches. All games will proceed as scheduled.
                     </p>
                   </div>
                 </div>

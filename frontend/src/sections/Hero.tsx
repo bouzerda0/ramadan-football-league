@@ -3,7 +3,17 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { usePrayerTimes } from '@/hooks/usePrayerTimes';
 import { ChevronDown, Moon, Star, Clock } from 'lucide-react';
-import type { Team } from '@/types';
+import type { Team, BackendTeam } from '@/types';
+
+interface StarProps {
+  top: string;
+  left: string;
+  width: string;
+  height: string;
+  animationDelay: string;
+}
+
+const COLORS = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
 
 export default function Hero() {
   const { t, dir } = useLanguage();
@@ -11,16 +21,23 @@ export default function Hero() {
   const { timeToIftar } = usePrayerTimes();
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [stars] = useState<StarProps[]>(() =>
+    [...Array(20)].map(() => ({
+      top: `${Math.random() * 60}%`,
+      left: `${Math.random() * 100}%`,
+      width: `${4 + Math.random() * 8}px`,
+      height: `${4 + Math.random() * 8}px`,
+      animationDelay: `${Math.random() * 2}s`,
+    }))
+  );
   const sectionRef = useRef<HTMLElement>(null);
-
-  const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
 
   useEffect(() => {
     const fetchTeams = async () => {
       try {
         const res = await fetch('/api/teams');
         if (res.ok) {
-          const data: any[] = await res.json();
+          const data: BackendTeam[] = await res.json();
           // Map backend teams to frontend structure
           const mappedTeams: Team[] = data.map((t, index) => ({
             id: t.id,
@@ -31,7 +48,7 @@ export default function Hero() {
             captain: t.captainName,
             motto: '',
             colors: {
-              primary: colors[index % colors.length],
+              primary: COLORS[index % COLORS.length],
               secondary: '#F4F6FA'
             },
             squad: [],
@@ -127,17 +144,17 @@ export default function Hero() {
 
       {/* Animated Stars */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {stars.map((star: StarProps, i: number) => (
           <Star
             key={i}
             className={`absolute text-[#D4A018] star-twinkle transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             style={{
-              top: `${Math.random() * 60}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${4 + Math.random() * 8}px`,
-              height: `${4 + Math.random() * 8}px`,
-              animationDelay: `${Math.random() * 2}s`,
+              top: star.top,
+              left: star.left,
+              width: star.width,
+              height: star.height,
+              animationDelay: star.animationDelay,
             }}
             fill="currentColor"
           />
@@ -197,7 +214,7 @@ export default function Hero() {
             <div className="flex items-center justify-center gap-4 md:gap-8">
               {/* Left Teams */}
               <div className="flex flex-col gap-3">
-                {teams.slice(0, 3).map((team, i) => (
+                {teams.slice(0, 3).map((team: Team, i: number) => (
                   <div
                     key={team.id}
                     className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#141B2D]/80 border border-[#D4A018]/20 backdrop-blur-sm"
@@ -243,7 +260,7 @@ export default function Hero() {
 
               {/* Right Teams */}
               <div className="flex flex-col gap-3">
-                {teams.slice(3, 6).map((team, i) => (
+                {teams.slice(3, 6).map((team: Team, i: number) => (
                   <div
                     key={team.id}
                     className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#141B2D]/80 border border-[#D4A018]/20 backdrop-blur-sm"

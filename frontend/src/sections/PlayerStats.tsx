@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Trophy, Target, HandHelping, Shield, AlertTriangle } from 'lucide-react';
+import type { BackendPlayer, BackendTeam } from '@/types';
 
 type StatTab = 'goals' | 'assists' | 'cleanSheets' | 'cards';
 
@@ -9,20 +10,20 @@ export default function PlayerStats() {
   const { t, dir } = useLanguage();
   const { ref, isVisible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
   const [activeTab, setActiveTab] = useState<StatTab>('goals');
-  const [players, setPlayers] = useState<any[]>([]);
-  const [teams, setTeams] = useState<Record<string, any>>({});
+  const [players, setPlayers] = useState<BackendPlayer[]>([]);
+  const [teams, setTeams] = useState<Record<string, BackendTeam>>({});
 
   useEffect(() => {
     fetch('/api/teams')
       .then(res => res.json())
-      .then(data => {
-        const allPlayers: any[] = [];
-        const teamsMap: Record<string, any> = {};
+      .then((data: BackendTeam[]) => {
+        const allPlayers: BackendPlayer[] = [];
+        const teamsMap: Record<string, BackendTeam> = {};
 
-        data.forEach((team: any) => {
+        data.forEach((team) => {
           teamsMap[team.id] = team;
           if (team.players) {
-            team.players.forEach((p: any) => {
+            team.players.forEach((p) => {
               allPlayers.push({ ...p, teamId: team.id });
             });
           }
@@ -62,7 +63,7 @@ export default function PlayerStats() {
     { id: 'cards', label: t('stats.cards'), icon: <AlertTriangle className="w-4 h-4" /> },
   ];
 
-  const getStatValue = (player: any) => {
+  const getStatValue = (player: BackendPlayer) => {
     switch (activeTab) {
       case 'goals': return player.goals || 0;
       case 'assists': return player.assists || 0;

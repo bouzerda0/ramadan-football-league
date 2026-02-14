@@ -1,0 +1,38 @@
+
+> my-app@0.0.0 lint
+> eslint .
+
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/badge.tsx
+  46:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/button-group.tsx
+  82:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/button.tsx
+  62:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/form.tsx
+  159:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/navigation-menu.tsx
+  167:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/sidebar.tsx
+  726:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/toggle.tsx
+  45:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/context/LanguageContext.tsx
+  145:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/context/SiteConfigContext.tsx
+  43:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/admin/AdminMatches.tsx
+  686:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  698:92  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 11 problems (11 errors, 0 warnings)
+

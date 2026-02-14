@@ -112,3 +112,35 @@ export interface Translations {
     en: string;
   };
 }
+
+export interface BackendPlayer {
+  id: string;
+  name: string;
+  number: number;
+  position: string;
+  isCaptain: boolean;
+  teamId: string;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+  cleanSheets: number;
+  matchesPlayed: number;
+}
+
+export interface BackendTeam {
+  id: string;
+  teamName: string;
+  captainName: string;
+  logoPath: string;
+  players?: BackendPlayer[];
+  played?: number;
+  won?: number;
+  drawn?: number;
+  lost?: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  points?: number;
+  form?: string[];
+  ramadanSpirit?: number;
+}

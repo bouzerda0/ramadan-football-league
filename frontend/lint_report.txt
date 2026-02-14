@@ -1,0 +1,134 @@
+
+> my-app@0.0.0 lint
+> eslint .
+
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/badge.tsx
+  46:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/button-group.tsx
+  82:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/button.tsx
+  62:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/form.tsx
+  159:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/navigation-menu.tsx
+  167:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/sidebar.tsx
+  611:26  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/sidebar.tsx:611:26
+  609 |   // Random width between 50 to 90%.
+  610 |   const width = React.useMemo(() => {
+> 611 |     return `${Math.floor(Math.random() * 40) + 50}%`
+      |                          ^^^^^^^^^^^^^ Cannot call impure function
+  612 |   }, [])
+  613 |
+  614 |   return (  react-hooks/purity
+  725:3   error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/toggle.tsx
+  45:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/context/LanguageContext.tsx
+  145:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/context/SiteConfigContext.tsx
+  43:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/RegistrationPage.tsx
+  211:85  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/admin/AdminLogin.tsx
+  31:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/admin/AdminMatches.tsx
+  212:37   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  543:125  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  660:109  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/admin/AdminTeams.tsx
+  204:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx
+   23:23  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  100:6   warning  React Hook useEffect has a missing dependency: 'colors'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+  136:23  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx:136:23
+  134 |               }`}
+  135 |             style={{
+> 136 |               top: `${Math.random() * 60}%`,
+      |                       ^^^^^^^^^^^^^ Cannot call impure function
+  137 |               left: `${Math.random() * 100}%`,
+  138 |               width: `${4 + Math.random() * 8}px`,
+  139 |               height: `${4 + Math.random() * 8}px`,                                        react-hooks/purity
+  137:24  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx:137:24
+  135 |             style={{
+  136 |               top: `${Math.random() * 60}%`,
+> 137 |               left: `${Math.random() * 100}%`,
+      |                        ^^^^^^^^^^^^^ Cannot call impure function
+  138 |               width: `${4 + Math.random() * 8}px`,
+  139 |               height: `${4 + Math.random() * 8}px`,
+  140 |               animationDelay: `${Math.random() * 2}s`,  react-hooks/purity
+  138:29  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx:138:29
+  136 |               top: `${Math.random() * 60}%`,
+  137 |               left: `${Math.random() * 100}%`,
+> 138 |               width: `${4 + Math.random() * 8}px`,
+      |                             ^^^^^^^^^^^^^ Cannot call impure function
+  139 |               height: `${4 + Math.random() * 8}px`,
+  140 |               animationDelay: `${Math.random() * 2}s`,
+  141 |             }}   react-hooks/purity
+  139:30  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx:139:30
+  137 |               left: `${Math.random() * 100}%`,
+  138 |               width: `${4 + Math.random() * 8}px`,
+> 139 |               height: `${4 + Math.random() * 8}px`,
+      |                              ^^^^^^^^^^^^^ Cannot call impure function
+  140 |               animationDelay: `${Math.random() * 2}s`,
+  141 |             }}
+  142 |             fill="currentColor"               react-hooks/purity
+  140:34  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx:140:34
+  138 |               width: `${4 + Math.random() * 8}px`,
+  139 |               height: `${4 + Math.random() * 8}px`,
+> 140 |               animationDelay: `${Math.random() * 2}s`,
+      |                                  ^^^^^^^^^^^^^ Cannot call impure function
+  141 |             }}
+  142 |             fill="currentColor"
+  143 |           />                                             react-hooks/purity
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/MatchOfTheDay.tsx
+   29:38  error    Unexpected any. Specify a different type                                                                              @typescript-eslint/no-explicit-any
+   79:13  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+   80:45  error    Unexpected any. Specify a different type                                                                              @typescript-eslint/no-explicit-any
+   81:13  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars')
+   82:45  error    Unexpected any. Specify a different type                                                                              @typescript-eslint/no-explicit-any
+  116:6   warning  React Hook useEffect has a missing dependency: 'config.matchStage'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 30 problems (26 errors, 4 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

@@ -208,6 +208,7 @@ export default function RegistrationPage() {
                                             {index + 1}
                                         </span>
                                         <Input
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             {...register(`players.${index}.name` as any)}
                                             className="bg-[#0B0F1C] border-[#D4A018]/20 focus:border-[#D4A018] text-white"
                                             placeholder={`Player ${index + 1} Name ${index === 0 ? '(Captain)' : ''}`}

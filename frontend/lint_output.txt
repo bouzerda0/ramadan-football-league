@@ -1,0 +1,78 @@
+
+> my-app@0.0.0 lint
+> eslint .
+
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/badge.tsx
+  46:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/button-group.tsx
+  82:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/button.tsx
+  62:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/form.tsx
+  159:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/navigation-menu.tsx
+  167:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/sidebar.tsx
+  611:26  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/sidebar.tsx:611:26
+  609 |   // Random width between 50 to 90%.
+  610 |   const width = React.useMemo(() => {
+> 611 |     return `${Math.floor(Math.random() * 40) + 50}%`
+      |                          ^^^^^^^^^^^^^ Cannot call impure function
+  612 |   }, [])
+  613 |
+  614 |   return (  react-hooks/purity
+  725:3   error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/components/ui/toggle.tsx
+  45:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/context/LanguageContext.tsx
+  145:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/context/SiteConfigContext.tsx
+  43:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/RegistrationPage.tsx
+  211:85  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/admin/AdminLogin.tsx
+  31:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/pages/admin/AdminMatches.tsx
+  629:95  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  634:95  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  686:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  698:92  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx
+   26:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/abouzerd/Desktop/zone01-football/frontend/src/sections/Hero.tsx:26:5
+  24 |
+  25 |   useEffect(() => {
+> 26 |     setStars([...Array(20)].map(() => ({
+     |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  27 |       top: `${Math.random() * 60}%`,
+  28 |       left: `${Math.random() * 100}%`,
+  29 |       width: `${4 + Math.random() * 8}px`,  react-hooks/set-state-in-effect
+   44:52  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  119:6   warning  React Hook useEffect has a missing dependency: 'colors'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+
+✖ 19 problems (18 errors, 1 warning)
+

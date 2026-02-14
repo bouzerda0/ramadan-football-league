@@ -2,21 +2,51 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Trophy } from 'lucide-react';
+import type { Team, BackendTeam } from '@/types';
 
 export default function Standings() {
   const { t, dir } = useLanguage();
   const { ref, isVisible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
 
-  const [teams, setTeams] = useState<any[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
     fetch('/api/teams')
       .then(res => res.json())
-      .then(data => {
+      .then((data: BackendTeam[]) => {
+        const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
+        const mappedTeams: Team[] = data.map((t, index) => ({
+          id: t.id,
+          name: t.teamName,
+          shortName: t.teamName ? t.teamName.substring(0, 3).toUpperCase() : 'UNK',
+          logo: t.logoPath || '',
+          cohort: 'Cohort ' + String.fromCharCode(65 + index),
+          captain: t.captainName,
+          motto: '',
+          colors: {
+            primary: colors[index % colors.length],
+            secondary: '#F4F6FA'
+          },
+          squad: [],
+          stats: {
+            played: t.played || 0,
+            won: t.won || 0,
+            drawn: t.drawn || 0,
+            lost: t.lost || 0,
+            goalsFor: t.goalsFor || 0,
+            goalsAgainst: t.goalsAgainst || 0,
+            goalDifference: (t.goalsFor || 0) - (t.goalsAgainst || 0),
+            points: t.points || 0,
+            form: t.form ? (t.form as ('W' | 'D' | 'L')[]) : [],
+            ramadanSpirit: t.ramadanSpirit || 0
+          },
+          qrCode: ''
+        }));
+
         // Sort by Points, then Goal Difference
-        const sorted = data.sort((a: any, b: any) => {
-          if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-          return ((b.goalsFor || 0) - (b.goalsAgainst || 0)) - ((a.goalsFor || 0) - (a.goalsAgainst || 0));
+        const sorted = mappedTeams.sort((a, b) => {
+          if (b.stats.points !== a.stats.points) return b.stats.points - a.stats.points;
+          return b.stats.goalDifference - a.stats.goalDifference;
         });
         setTeams(sorted);
       })
@@ -74,8 +104,8 @@ export default function Standings() {
 
             {/* Table Body */}
             <div className="divide-y divide-[#D4A018]/10">
-              {teams.map((team, index) => {
-                const gd = (team.goalsFor || 0) - (team.goalsAgainst || 0);
+              {teams.map((team: Team, index: number) => {
+                const gd = team.stats.goalDifference;
                 return (
                   <div
                     key={team.id}
@@ -107,42 +137,42 @@ export default function Standings() {
                       <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 bg-[#333] overflow-hidden"
                       >
-                        {team.logoPath ? <img src={team.logoPath} className="w-full h-full object-cover" /> : team.teamName[0]}
+                        {team.logo ? <img src={team.logo} className="w-full h-full object-cover" /> : team.name[0]}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-[#F4F6FA] truncate">{team.teamName}</p>
-                        <p className="text-xs text-[#6B7280] hidden sm:block">{team.captainName}</p>
+                        <p className="font-semibold text-[#F4F6FA] truncate">{team.name}</p>
+                        <p className="text-xs text-[#6B7280] hidden sm:block">{team.captain}</p>
                       </div>
                     </div>
 
                     {/* Matches Played */}
                     <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
-                      {team.played || 0}
+                      {team.stats.played}
                     </div>
 
                     {/* Wins */}
                     <div className="col-span-1 text-center text-emerald-400 font-semibold">
-                      {team.won || 0}
+                      {team.stats.won}
                     </div>
 
                     {/* Draws */}
                     <div className="col-span-1 text-center text-amber-400 font-semibold">
-                      {team.drawn || 0}
+                      {team.stats.drawn}
                     </div>
 
                     {/* Losses */}
                     <div className="col-span-1 text-center text-red-400 font-semibold">
-                      {team.lost || 0}
+                      {team.stats.lost}
                     </div>
 
                     {/* Goals For */}
                     <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
-                      {team.goalsFor || 0}
+                      {team.stats.goalsFor}
                     </div>
 
                     {/* Goals Against */}
                     <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
-                      {team.goalsAgainst || 0}
+                      {team.stats.goalsAgainst}
                     </div>
 
                     {/* Goal Difference */}
@@ -155,7 +185,7 @@ export default function Standings() {
                     {/* Points */}
                     <div className="col-span-2 md:col-span-1 text-center">
                       <span className="inline-flex items-center justify-center w-10 h-8 rounded-lg bg-[#D4A018]/20 text-[#D4A018] font-bold">
-                        {team.points || 0}
+                        {team.stats.points}
                       </span>
                     </div>
                   </div>
