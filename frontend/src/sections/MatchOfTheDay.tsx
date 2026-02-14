@@ -81,17 +81,17 @@ export default function MatchOfTheDay() {
               setMatch({
                 ...selectedMatch,
                 home: {
-                  teamName: homeTeam.teamName,
-                  logoPath: homeTeam.logoPath,
-                  colors: { primary: '#10B981', secondary: '#ffffff' }, // Fallback logic would normally derive from name/id
+                  teamName: homeTeam.teamName || 'Unknown Team',
+                  logoPath: homeTeam.logoPath || '',
+                  colors: { primary: '#D4A018', secondary: '#F4F6FA' }, // Default gold
                   shortName: homeTeam.teamName ? homeTeam.teamName.substring(0, 3).toUpperCase() : 'HOM',
-                  cohort: 'Cohort 1'
+                  cohort: 'Cohort ' + String.fromCharCode(65 + teams.indexOf(homeTeam)),
                 },
                 away: {
-                  teamName: awayTeam.teamName,
-                  logoPath: awayTeam.logoPath,
+                  teamName: awayTeam.teamName || 'Unknown Team',
+                  logoPath: awayTeam.logoPath || '',
                   colors: { primary: '#3B82F6', secondary: '#ffffff' },
-                  shortName: awayTeam.teamName ? awayTeam.teamName.substring(0, 3).toUpperCase() : 'AWAY',
+                  shortName: awayTeam.teamName ? awayTeam.teamName.substring(0, 3).toUpperCase() : 'AWY',
                   cohort: 'Cohort 2'
                 },
                 stage: config.matchStage || 'League Match'
@@ -116,8 +116,12 @@ export default function MatchOfTheDay() {
 
   if (!match) {
     return (
-      <section className="py-20 text-center text-[#D4A018]">
-        <h2 className="text-2xl font-display font-bold">{t('status.no_data')}</h2>
+      <section className="py-16 text-center">
+        <div className="max-w-md mx-auto px-6 py-10 rounded-2xl bg-[#141B2D]/60 border border-[#D4A018]/20">
+          <span className="text-4xl mb-4 block">⚽</span>
+          <h2 className="text-xl font-display font-bold text-[#F4F6FA] mb-2">No Match Scheduled Today</h2>
+          <p className="text-sm text-[#A9B3C7]">Check back later for upcoming matches</p>
+        </div>
       </section>
     );
   }

@@ -238,19 +238,25 @@ func main() {
 		})
 	}
 
-	// Serve static files from the frontend build directory
-	if _, err := os.Stat("./frontend/dist"); os.IsNotExist(err) {
-		log.Println("Warning: ./frontend/dist does not exist. Please run 'npm run build' in frontend directory.")
+	// Determine frontend dist path
+	distPath := "./frontend/dist"
+	if _, err := os.Stat(distPath); os.IsNotExist(err) {
+		// Try parent directory
+		if _, err := os.Stat("../frontend/dist"); err == nil {
+			distPath = "../frontend/dist"
+		} else {
+			log.Println("Warning: frontend/dist not found in . or ..")
+		}
 	}
 
 	// SPA Handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		path := filepath.Join("./frontend/dist", r.URL.Path)
+		path := filepath.Join(distPath, r.URL.Path)
 		if info, err := os.Stat(path); err == nil && !info.IsDir() {
-			http.FileServer(http.Dir("./frontend/dist")).ServeHTTP(w, r)
+			http.FileServer(http.Dir(distPath)).ServeHTTP(w, r)
 			return
 		}
-		http.ServeFile(w, r, "./frontend/dist/index.html")
+		http.ServeFile(w, r, filepath.Join(distPath, "index.html"))
 	})
 
 	// Serve uploaded files
@@ -448,10 +454,11 @@ func handleAdminConfig(w http.ResponseWriter, r *http.Request) {
 			config = SiteConfig{}
 		}
 
-		// Parse JSON body
-		var updates map[string]interface{}
-		if err := json.NewDecoder(r.Body).Decode(&updates); err != nil {
-			// Try multipart form for logo upload
+		contentType := r.Header.Get("Content-Type")
+		isMultipart := len(contentType) > 0 && (contentType == "multipart/form-data" || len(contentType) > 19 && contentType[:19] == "multipart/form-data")
+
+		if isMultipart {
+			// Handle multipart form (logo upload)
 			err := r.ParseMultipartForm(10 << 20)
 			if err != nil {
 				http.Error(w, "Failed to parse request", http.StatusBadRequest)
@@ -500,9 +507,15 @@ func handleAdminConfig(w http.ResponseWriter, r *http.Request) {
 				defer dst.Close()
 				io.Copy(dst, file)
 				config.LogoPath = "/uploads/" + filename
+				log.Printf("Logo uploaded: %s", config.LogoPath)
 			}
 		} else {
 			// Handle JSON updates
+			var updates map[string]interface{}
+			if err := json.NewDecoder(r.Body).Decode(&updates); err != nil {
+				http.Error(w, "Invalid JSON", http.StatusBadRequest)
+				return
+			}
 			if title, ok := updates["title"].(string); ok {
 				config.Title = title
 			}
@@ -530,39 +543,15 @@ func handleAdminConfig(w http.ResponseWriter, r *http.Request) {
 			if autoUpdate, ok := updates["autoUpdateMatches"].(bool); ok {
 				config.AutoUpdateMatches = autoUpdate
 			}
-			if fajr, ok := updates["fajr"].(string); ok {
-				config.Fajr = fajr
-			}
-			if sunrise, ok := updates["sunrise"].(string); ok {
-				config.Sunrise = sunrise
-			}
-			if dhuhr, ok := updates["dhuhr"].(string); ok {
-				config.Dhuhr = dhuhr
-			}
-			if asr, ok := updates["asr"].(string); ok {
-				config.Asr = asr
-			}
-			if maghrib, ok := updates["maghrib"].(string); ok {
-				config.Maghrib = maghrib
-			}
-			if isha, ok := updates["isha"].(string); ok {
-				config.Isha = isha
-			}
-			if weatherTemp, ok := updates["weatherTemp"].(float64); ok {
-				config.WeatherTemp = int(weatherTemp)
-			}
-			if weatherCondition, ok := updates["weatherCondition"].(string); ok {
-				config.WeatherCondition = weatherCondition
-			}
-			if weatherWind, ok := updates["weatherWind"].(float64); ok {
-				config.WeatherWind = int(weatherWind)
-			}
-			if weatherHumidity, ok := updates["weatherHumidity"].(float64); ok {
-				config.WeatherHumidity = int(weatherHumidity)
+			// Only update logoPath if a non-empty value is provided
+			if logoPath, ok := updates["logoPath"].(string); ok && logoPath != "" {
+				config.LogoPath = logoPath
 			}
 		}
 
-		db.Save(&config)
+		if result := db.Save(&config); result.Error != nil {
+			log.Printf("Error saving config: %v", result.Error)
+		}
 		json.NewEncoder(w).Encode(config)
 		return
 	}

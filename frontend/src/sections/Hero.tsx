@@ -3,7 +3,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { usePrayerTimes } from '@/hooks/usePrayerTimes';
 import { ChevronDown, Moon, Star, Clock } from 'lucide-react';
-import type { Team, BackendTeam } from '@/types';
+import type { Team } from '@/types';
 
 interface StarProps {
   top: string;
@@ -33,22 +33,30 @@ export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    console.log('Hero: Mounting');
     const fetchTeams = async () => {
       try {
         const res = await fetch('/api/teams');
+        console.log('Hero: Fetch Status', res.status);
         if (res.ok) {
-          const data: BackendTeam[] = await res.json();
-          // Map backend teams to frontend structure
+          const data = await res.json();
+          console.log('Hero: Data received', data);
+
+          if (!Array.isArray(data)) {
+            console.error('Hero: Data is not an array', data);
+            throw new Error('Data is not an array');
+          }
+
           const mappedTeams: Team[] = data.map((t, index) => ({
             id: t.id,
             name: t.teamName,
-            shortName: t.teamName.substring(0, 3).toUpperCase(),
+            shortName: t.teamName ? t.teamName.substring(0, 3).toUpperCase() : 'UNK',
             logo: t.logoPath || '',
             cohort: 'Cohort ' + String.fromCharCode(65 + index), // A, B, C...
             captain: t.captainName,
             motto: '',
             colors: {
-              primary: COLORS[index % COLORS.length],
+              primary: COLORS[index % COLORS.length] || '#1F2937',
               secondary: '#F4F6FA'
             },
             squad: [],
@@ -74,26 +82,13 @@ export default function Hero() {
               qrCode: ''
             });
           }
+          console.log('Hero: Setting teams', displayTeams);
           setTeams(displayTeams);
         } else {
-          // Fallback to placeholders if fetch fails or no teams
-          const placeholders = Array(6).fill(null).map((_, i) => ({
-            id: `placeholder-${i}`,
-            name: `Team ${i + 1}`,
-            shortName: `TM${i + 1}`,
-            logo: '',
-            cohort: '',
-            captain: '',
-            motto: '',
-            colors: { primary: '#1F2937', secondary: '#9CA3AF' },
-            squad: [],
-            stats: { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, form: [], ramadanSpirit: 0 },
-            qrCode: ''
-          })) as Team[];
-          setTeams(placeholders);
+          throw new Error('Fetch failed');
         }
       } catch (err) {
-        console.error("Failed to fetch teams", err);
+        console.error("Hero: Failed to fetch teams", err);
         // Fallback
         const placeholders = Array(6).fill(null).map((_, i) => ({
           id: `placeholder-${i}`,
@@ -296,24 +291,23 @@ export default function Hero() {
                 <div className="flex flex-col items-center">
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-2"
-                    style={{ backgroundColor: nextMatch.home?.colors.primary, color: nextMatch.home?.colors.secondary }}
+                    style={{ backgroundColor: nextMatch.home?.colors?.primary || '#1F2937', color: nextMatch.home?.colors?.secondary || '#9CA3AF' }}
                   >
-                    {nextMatch.home?.shortName[0]}
+                    {nextMatch.home?.shortName?.[0] || '?'}
                   </div>
-                  <span className="text-sm font-medium text-[#F4F6FA]">{nextMatch.home?.shortName}</span>
+                  <span className="text-sm font-semibold text-[#F4F6FA]">{nextMatch.home?.name || 'TBD'}</span>
                 </div>
-                <div className="text-center">
-                  <span className="text-2xl font-display font-black text-[#D4A018]">{t('common.vs')}</span>
-                  <p className="text-xs text-[#A9B3C7] mt-1">{nextMatch.date}</p>
+                <div className="flex flex-col items-center px-4">
+                  <span className="text-2xl font-display font-bold text-[#D4A018]">VS</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-2"
-                    style={{ backgroundColor: nextMatch.away?.colors.primary, color: nextMatch.away?.colors.secondary }}
+                    style={{ backgroundColor: nextMatch.away?.colors?.primary || '#1F2937', color: nextMatch.away?.colors?.secondary || '#9CA3AF' }}
                   >
-                    {nextMatch.away?.shortName[0]}
+                    {nextMatch.away?.shortName?.[0] || '?'}
                   </div>
-                  <span className="text-sm font-medium text-[#F4F6FA]">{nextMatch.away?.shortName}</span>
+                  <span className="text-sm font-semibold text-[#F4F6FA]">{nextMatch.away?.name || 'TBD'}</span>
                 </div>
               </div>
             </div>

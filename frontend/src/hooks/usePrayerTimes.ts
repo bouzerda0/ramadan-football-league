@@ -12,37 +12,48 @@ const defaultPrayerTimes: PrayerTimes = {
   date: new Date().toISOString().split('T')[0],
 };
 
+// Oujda coordinates
+const OUJDA_LAT = 34.6814;
+const OUJDA_LON = -1.9086;
+
 export function usePrayerTimes() {
   const [currentPrayerTimes, setCurrentPrayerTimes] = useState<PrayerTimes>(defaultPrayerTimes);
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string; remaining: number } | null>(null);
   const [timeToIftar, setTimeToIftar] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch prayer times from API
+  // Fetch prayer times from Aladhan API for Oujda
   useEffect(() => {
-    const fetchConfig = async () => {
+    const fetchPrayerTimes = async () => {
       try {
-        const response = await fetch('/api/config');
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const response = await fetch(
+          `https://api.aladhan.com/v1/timings/${dd}-${mm}-${yyyy}?latitude=${OUJDA_LAT}&longitude=${OUJDA_LON}&method=3`
+        );
         if (response.ok) {
-          const config = await response.json();
+          const data = await response.json();
+          const timings = data.data.timings;
           setCurrentPrayerTimes({
-            fajr: config.fajr || defaultPrayerTimes.fajr,
-            sunrise: config.sunrise || defaultPrayerTimes.sunrise,
-            dhuhr: config.dhuhr || defaultPrayerTimes.dhuhr,
-            asr: config.asr || defaultPrayerTimes.asr,
-            maghrib: config.maghrib || defaultPrayerTimes.maghrib,
-            isha: config.isha || defaultPrayerTimes.isha,
-            date: new Date().toISOString().split('T')[0],
+            fajr: timings.Fajr?.substring(0, 5) || defaultPrayerTimes.fajr,
+            sunrise: timings.Sunrise?.substring(0, 5) || defaultPrayerTimes.sunrise,
+            dhuhr: timings.Dhuhr?.substring(0, 5) || defaultPrayerTimes.dhuhr,
+            asr: timings.Asr?.substring(0, 5) || defaultPrayerTimes.asr,
+            maghrib: timings.Maghrib?.substring(0, 5) || defaultPrayerTimes.maghrib,
+            isha: timings.Isha?.substring(0, 5) || defaultPrayerTimes.isha,
+            date: `${yyyy}-${mm}-${dd}`,
           });
         }
       } catch (error) {
-        console.error('Failed to fetch prayer times:', error);
+        console.error('Failed to fetch prayer times from Aladhan:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchConfig();
+    fetchPrayerTimes();
   }, []);
 
   const parseTime = useCallback((timeStr: string): Date => {
@@ -66,7 +77,7 @@ export function usePrayerTimes() {
       // Calculate time to Iftar (Maghrib)
       const maghribTime = parseTime(currentPrayerTimes.maghrib);
       const iftarDiff = maghribTime.getTime() - now.getTime();
-      
+
       if (iftarDiff > 0) {
         setTimeToIftar(formatRemaining(iftarDiff));
       } else {
@@ -119,24 +130,41 @@ export function useWeather() {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const response = await fetch('/api/config');
+        // Open-Meteo free API for Oujda weather
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${OUJDA_LAT}&longitude=${OUJDA_LON}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`
+        );
         if (response.ok) {
-          const config = await response.json();
+          const data = await response.json();
+          const current = data.current;
+          // Map WMO weather codes to conditions
+          const weatherCode = current.weather_code || 0;
+          let condition = 'Clear';
+          if (weatherCode <= 1) condition = 'Clear';
+          else if (weatherCode <= 3) condition = 'Partly Cloudy';
+          else if (weatherCode <= 48) condition = 'Cloudy';
+          else if (weatherCode <= 67) condition = 'Rainy';
+          else if (weatherCode <= 77) condition = 'Snowy';
+          else if (weatherCode <= 99) condition = 'Stormy';
+
           setWeather({
-            temp: config.weatherTemp || 18,
-            condition: config.weatherCondition || 'Clear',
-            wind: config.weatherWind || 12,
-            humidity: config.weatherHumidity || 62,
+            temp: Math.round(current.temperature_2m || 18),
+            condition,
+            wind: Math.round(current.wind_speed_10m || 12),
+            humidity: Math.round(current.relative_humidity_2m || 62),
           });
         }
       } catch (error) {
-        console.error('Failed to fetch weather:', error);
+        console.error('Failed to fetch weather from Open-Meteo:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchWeather();
+    // Refresh weather every 30 minutes
+    const interval = setInterval(fetchWeather, 30 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return { weather, loading };

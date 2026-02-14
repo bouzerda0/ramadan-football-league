@@ -14,43 +14,65 @@ export default function Standings() {
     fetch('/api/teams')
       .then(res => res.json())
       .then((data: BackendTeam[]) => {
-        const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
-        const mappedTeams: Team[] = data.map((t, index) => ({
-          id: t.id,
-          name: t.teamName,
-          shortName: t.teamName ? t.teamName.substring(0, 3).toUpperCase() : 'UNK',
-          logo: t.logoPath || '',
-          cohort: 'Cohort ' + String.fromCharCode(65 + index),
-          captain: t.captainName,
-          motto: '',
-          colors: {
-            primary: colors[index % colors.length],
-            secondary: '#F4F6FA'
-          },
-          squad: [],
-          stats: {
-            played: t.played || 0,
-            won: t.won || 0,
-            drawn: t.drawn || 0,
-            lost: t.lost || 0,
-            goalsFor: t.goalsFor || 0,
-            goalsAgainst: t.goalsAgainst || 0,
-            goalDifference: (t.goalsFor || 0) - (t.goalsAgainst || 0),
-            points: t.points || 0,
-            form: t.form ? (t.form as ('W' | 'D' | 'L')[]) : [],
-            ramadanSpirit: t.ramadanSpirit || 0
-          },
-          qrCode: ''
-        }));
+        try {
+          if (!Array.isArray(data)) return;
+          const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
+          const mappedTeams: Team[] = data.map((t, index) => {
+            // Handle form field - could be array, string, or undefined
+            let formArr: ('W' | 'D' | 'L')[] = [];
+            try {
+              if (Array.isArray(t.form)) {
+                formArr = t.form.filter((f: string) => ['W', 'D', 'L'].includes(f)) as ('W' | 'D' | 'L')[];
+              } else if (typeof t.form === 'string' && t.form) {
+                formArr = (t.form as string).split(',').filter((f: string) => ['W', 'D', 'L'].includes(f.trim())) as ('W' | 'D' | 'L')[];
+              }
+            } catch { formArr = []; }
 
-        // Sort by Points, then Goal Difference
-        const sorted = mappedTeams.sort((a, b) => {
-          if (b.stats.points !== a.stats.points) return b.stats.points - a.stats.points;
-          return b.stats.goalDifference - a.stats.goalDifference;
-        });
-        setTeams(sorted);
+            // API may return 'name' or 'teamName', 'captain' or 'captainName'
+            const rawTeam = t as unknown as Record<string, unknown>;
+            const teamName = (rawTeam.name as string) || t.teamName || 'Unknown Team';
+            const captainName = (rawTeam.captain as string) || t.captainName || '';
+
+            return {
+              id: t.id || `team-${index}`,
+              name: teamName,
+              shortName: teamName ? teamName.substring(0, 3).toUpperCase() : 'UNK',
+              logo: t.logoPath || '',
+              cohort: 'Cohort ' + String.fromCharCode(65 + index),
+              captain: captainName,
+              motto: '',
+              colors: {
+                primary: colors[index % colors.length],
+                secondary: '#F4F6FA'
+              },
+              squad: [],
+              stats: {
+                played: t.played || 0,
+                won: t.won || 0,
+                drawn: t.drawn || 0,
+                lost: t.lost || 0,
+                goalsFor: t.goalsFor || 0,
+                goalsAgainst: t.goalsAgainst || 0,
+                goalDifference: (t.goalsFor || 0) - (t.goalsAgainst || 0),
+                points: t.points || 0,
+                form: formArr,
+                ramadanSpirit: t.ramadanSpirit || 0
+              },
+              qrCode: ''
+            };
+          });
+
+          // Sort by Points, then Goal Difference
+          const sorted = mappedTeams.sort((a, b) => {
+            if (b.stats.points !== a.stats.points) return b.stats.points - a.stats.points;
+            return b.stats.goalDifference - a.stats.goalDifference;
+          });
+          setTeams(sorted);
+        } catch (err) {
+          console.error('Standings: Error mapping team data', err);
+        }
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error('Standings: Fetch error', err));
   }, []);
 
   return (
@@ -137,7 +159,7 @@ export default function Standings() {
                       <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 bg-[#333] overflow-hidden"
                       >
-                        {team.logo ? <img src={team.logo} className="w-full h-full object-cover" /> : team.name[0]}
+                        {team.logo ? <img src={team.logo} className="w-full h-full object-cover" /> : (team.name ? team.name[0] : '?')}
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-[#F4F6FA] truncate">{team.name}</p>

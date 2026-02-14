@@ -115,7 +115,7 @@ export default function Schedule() {
   };
 
   const getTeamName = (teamId: string) => teams[teamId]?.name || teamId;
-  const getTeamShortName = (teamId: string) => teams[teamId]?.shortName || teamId.substring(0, 3);
+  const getTeamShortName = (teamId: string) => teams[teamId]?.shortName || (teamId ? teamId.substring(0, 3) : 'UNK');
   const getTeamColor = (teamId: string) => teams[teamId]?.primaryColor || '#333';
   const getTeamSecondaryColor = (teamId: string) => teams[teamId]?.secondaryColor || '#fff';
   const getTeamLogo = (teamId: string) => teams[teamId]?.logoPath;
