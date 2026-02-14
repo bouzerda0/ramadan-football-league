@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { Menu, X, Trophy, Globe } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navigation() {
   const { t, language, setLanguage, dir } = useLanguage();
+  const { config } = useSiteConfig();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -68,14 +70,18 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#D4A018] flex items-center justify-center transition-transform group-hover:scale-110">
-                <Trophy className="w-4 h-4 md:w-5 md:h-5 text-[#0B0F1C]" />
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#D4A018] flex items-center justify-center transition-transform group-hover:scale-110 overflow-hidden">
+                {config.logoPath ? (
+                  <img src={config.logoPath} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <Trophy className="w-4 h-4 md:w-5 md:h-5 text-[#0B0F1C]" />
+                )}
               </div>
               <div className="hidden sm:block text-left">
                 <span className="font-display font-bold text-[#F4F6FA] text-sm md:text-base block">
-                  Zone 01 Oujda
+                  {config.title}
                 </span>
-                <span className="block text-[10px] text-[#D4A018]">RFL 2026</span>
+                <span className="block text-[10px] text-[#D4A018]">{config.subtitle}</span>
               </div>
             </button>
 

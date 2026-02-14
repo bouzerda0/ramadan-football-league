@@ -13,6 +13,7 @@ interface Match {
     homeScore: number;
     awayScore: number;
     status: string; // scheduled, live, finished
+    round?: string; // QF1-4, SF1-2, Final
 }
 
 interface Team {
@@ -24,6 +25,7 @@ export default function AdminMatches() {
     const [matches, setMatches] = useState<Match[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
     const [_loading, setLoading] = useState(true);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     // New Match State
     const [newMatch, setNewMatch] = useState<Partial<Match>>({
@@ -34,6 +36,7 @@ export default function AdminMatches() {
         status: 'scheduled',
         homeScore: 0,
         awayScore: 0,
+        round: '',
     });
 
     useEffect(() => {
@@ -47,8 +50,14 @@ export default function AdminMatches() {
                 fetch("/api/teams")
             ]);
 
-            if (matchesRes.ok) setMatches(await matchesRes.json());
-            if (teamsRes.ok) setTeams(await teamsRes.json());
+            if (matchesRes.ok) {
+                const data = await matchesRes.json();
+                setMatches(data || []);
+            }
+            if (teamsRes.ok) {
+                const data = await teamsRes.json();
+                setTeams(data || []);
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -89,15 +98,21 @@ export default function AdminMatches() {
         }
     };
 
-    const handleDeleteMatch = async (id: string) => {
-        if (!confirm("Delete this match?")) return;
+    const confirmDeleteMatch = async () => {
+        if (!deleteId) return;
         try {
-            const response = await fetch(`/api/admin/matches?id=${id}`, {
+            const response = await fetch(`/api/admin/matches?id=${deleteId}`, {
                 method: 'DELETE',
             });
-            if (response.ok) fetchData();
+            if (response.ok) {
+                setDeleteId(null);
+                fetchData();
+            } else {
+                alert("Failed to delete match. Check console.");
+            }
         } catch (error) {
             console.error("Failed to delete match:", error);
+            alert("Error deleting match.");
         }
     };
 
@@ -145,6 +160,21 @@ export default function AdminMatches() {
                         required
                     />
 
+                    <select
+                        className="bg-[#0B0F1C] p-2 rounded border border-[#D4A018]/20"
+                        value={newMatch.round || ''}
+                        onChange={(e) => setNewMatch({ ...newMatch, round: e.target.value })}
+                    >
+                        <option value="">League Match (Default)</option>
+                        <option value="QF1">Quarter Final 1</option>
+                        <option value="QF2">Quarter Final 2</option>
+                        <option value="QF3">Quarter Final 3</option>
+                        <option value="QF4">Quarter Final 4</option>
+                        <option value="SF1">Semi Final 1</option>
+                        <option value="SF2">Semi Final 2</option>
+                        <option value="Final">Final</option>
+                    </select>
+
                     <button type="submit" className="bg-[#D4A018] text-[#0B0F1C] font-bold p-2 rounded hover:bg-[#B38612]">
                         Add Match
                     </button>
@@ -154,81 +184,131 @@ export default function AdminMatches() {
             {/* List Matches */}
             <div className="space-y-4">
                 <h2 className="text-xl font-bold">Scheduled Matches</h2>
-                {matches.map(match => (
-                    <div key={match.id} className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10 flex flex-col md:flex-row items-center gap-4">
-                        <div className="flex-1 grid grid-cols-3 items-center text-center gap-4">
-                            <span className="font-bold text-right">
-                                {teams.find(t => t.id === match.homeTeamId)?.teamName || 'Unknown'}
-                            </span>
+                {matches.length === 0 ? (
+                    <div className="text-[#A9B3C7] italic p-4 bg-[#141B2D] rounded-xl border border-[#D4A018]/10 text-center">
+                        No matches scheduled yet.
+                    </div>
+                ) : (
+                    matches.map(match => (
+                        <div key={match.id} className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10 flex flex-col md:flex-row items-center gap-4">
+                            <div className="flex-1 grid grid-cols-3 items-center text-center gap-4">
+                                <span className="font-bold text-right">
+                                    {teams.find(t => t.id === match.homeTeamId)?.teamName || 'Unknown'}
+                                </span>
 
-                            <div className="flex items-center justify-center gap-2">
-                                <input
-                                    type="number"
-                                    className="w-12 bg-[#0B0F1C] text-center p-1 rounded"
-                                    value={match.homeScore}
-                                    onChange={(e) => {
-                                        const updatedMatches = matches.map(m =>
-                                            m.id === match.id ? { ...m, homeScore: parseInt(e.target.value) } : m
-                                        );
-                                        setMatches(updatedMatches);
-                                    }}
-                                />
-                                <span className="text-[#6B7280]">-</span>
-                                <input
-                                    type="number"
-                                    className="w-12 bg-[#0B0F1C] text-center p-1 rounded"
-                                    value={match.awayScore}
-                                    onChange={(e) => {
-                                        const updatedMatches = matches.map(m =>
-                                            m.id === match.id ? { ...m, awayScore: parseInt(e.target.value) } : m
-                                        );
-                                        setMatches(updatedMatches);
-                                    }}
-                                />
+                                <div className="flex items-center justify-center gap-2">
+                                    <input
+                                        type="number"
+                                        className="w-12 bg-[#0B0F1C] text-center p-1 rounded"
+                                        value={match.homeScore}
+                                        onChange={(e) => {
+                                            const updatedMatches = matches.map(m =>
+                                                m.id === match.id ? { ...m, homeScore: parseInt(e.target.value) } : m
+                                            );
+                                            setMatches(updatedMatches);
+                                        }}
+                                    />
+                                    <span className="text-[#6B7280]">-</span>
+                                    <input
+                                        type="number"
+                                        className="w-12 bg-[#0B0F1C] text-center p-1 rounded"
+                                        value={match.awayScore}
+                                        onChange={(e) => {
+                                            const updatedMatches = matches.map(m =>
+                                                m.id === match.id ? { ...m, awayScore: parseInt(e.target.value) } : m
+                                            );
+                                            setMatches(updatedMatches);
+                                        }}
+                                    />
+                                </div>
+
+                                <span className="font-bold text-left">
+                                    {teams.find(t => t.id === match.awayTeamId)?.teamName || 'Unknown'}
+                                </span>
                             </div>
 
-                            <span className="font-bold text-left">
-                                {teams.find(t => t.id === match.awayTeamId)?.teamName || 'Unknown'}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <select
+                                    className={`bg-[#0B0F1C] p-2 rounded border text-sm ${match.status === 'live' ? 'text-red-400 border-red-500/50' :
+                                        match.status === 'finished' ? 'text-emerald-400 border-emerald-500/50' :
+                                            'text-[#A9B3C7] border-[#D4A018]/20'
+                                        }`}
+                                    value={match.status}
+                                    onChange={(e) => {
+                                        const updatedMatches = matches.map(m =>
+                                            m.id === match.id ? { ...m, status: e.target.value } : m
+                                        );
+                                        setMatches(updatedMatches);
+                                    }}
+                                >
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="live">Live</option>
+                                    <option value="finished">Finished</option>
+                                </select>
+
+                                <select
+                                    className="w-24 bg-[#0B0F1C] p-2 rounded border border-[#D4A018]/20 text-xs"
+                                    value={match.round || ''}
+                                    onChange={(e) => {
+                                        const updatedMatches = matches.map(m =>
+                                            m.id === match.id ? { ...m, round: e.target.value } : m
+                                        );
+                                        setMatches(updatedMatches);
+                                    }}
+                                >
+                                    <option value="">League</option>
+                                    <option value="QF1">QF1</option>
+                                    <option value="QF2">QF2</option>
+                                    <option value="QF3">QF3</option>
+                                    <option value="QF4">QF4</option>
+                                    <option value="SF1">SF1</option>
+                                    <option value="SF2">SF2</option>
+                                    <option value="Final">Final</option>
+                                </select>
+
+                                <button
+                                    onClick={() => handleUpdateMatch(match)}
+                                    className="p-2 bg-[#D4A018]/10 text-[#D4A018] rounded hover:bg-[#D4A018]/20"
+                                    title="Save Changes"
+                                >
+                                    <Save className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={() => setDeleteId(match.id)}
+                                    className="p-2 bg-red-500/10 text-red-500 rounded hover:bg-red-500/20"
+                                    title="Delete Match"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
+                    ))
+                )}
+            </div>
 
-                        <div className="flex items-center gap-2">
-                            <select
-                                className={`bg-[#0B0F1C] p-2 rounded border text-sm ${match.status === 'live' ? 'text-red-400 border-red-500/50' :
-                                    match.status === 'finished' ? 'text-emerald-400 border-emerald-500/50' :
-                                        'text-[#A9B3C7] border-[#D4A018]/20'
-                                    }`}
-                                value={match.status}
-                                onChange={(e) => {
-                                    const updatedMatches = matches.map(m =>
-                                        m.id === match.id ? { ...m, status: e.target.value } : m
-                                    );
-                                    setMatches(updatedMatches);
-                                }}
-                            >
-                                <option value="scheduled">Scheduled</option>
-                                <option value="live">Live</option>
-                                <option value="finished">Finished</option>
-                            </select>
-
+            {/* Delete Modal */}
+            {deleteId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="bg-[#141B2D] w-full max-w-sm rounded-2xl border border-red-500/20 p-6">
+                        <h3 className="text-xl font-bold text-[#F4F6FA] mb-4">Delete Match?</h3>
+                        <p className="text-[#A9B3C7] mb-6">Are you sure you want to delete this match?</p>
+                        <div className="flex justify-end gap-2">
                             <button
-                                onClick={() => handleUpdateMatch(match)}
-                                className="p-2 bg-[#D4A018]/10 text-[#D4A018] rounded hover:bg-[#D4A018]/20"
-                                title="Save Changes"
+                                onClick={() => setDeleteId(null)}
+                                className="px-4 py-2 bg-[#141B2D] border border-[#D4A018]/20 rounded-lg hover:bg-[#141B2D]/80 transition-colors text-[#F4F6FA]"
                             >
-                                <Save className="w-5 h-5" />
+                                Cancel
                             </button>
                             <button
-                                onClick={() => handleDeleteMatch(match.id)}
-                                className="p-2 bg-red-500/10 text-red-500 rounded hover:bg-red-500/20"
-                                title="Delete Match"
+                                onClick={confirmDeleteMatch}
+                                className="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition-colors"
                             >
-                                <Trash2 className="w-5 h-5" />
+                                Delete
                             </button>
                         </div>
                     </div>
-                ))}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

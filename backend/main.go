@@ -49,6 +49,20 @@ type Team struct {
 	Form         string `json:"form"` // e.g. "W,L,D,W,W"
 }
 
+type SiteConfig struct {
+	ID                uint   `json:"-" gorm:"primaryKey"`
+	Title             string `json:"title"`
+	Subtitle          string `json:"subtitle"`
+	HeroSubtitle      string `json:"heroSubtitle"`
+	HeroTitle1        string `json:"heroTitle1"`
+	HeroTitle2        string `json:"heroTitle2"`
+	HeroTitle3        string `json:"heroTitle3"`
+	LogoPath          string `json:"logoPath"`
+	AutoUpdateMatches bool   `json:"autoUpdateMatches"`
+	FeaturedMatchID   string `json:"featuredMatchId"`
+	MatchStage        string `json:"matchStage"`
+}
+
 // ... existing code ...
 
 func handleAdminTeams(w http.ResponseWriter, r *http.Request) {
@@ -56,9 +70,34 @@ func handleAdminTeams(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodDelete {
 		id := r.URL.Query().Get("id")
-		// Delete players first (cascade simulation)
-		db.Delete(&Player{}, "team_id = ?", id)
-		db.Delete(&Team{}, "id = ?", id)
+		if id == "" {
+			http.Error(w, "Missing team ID", http.StatusBadRequest)
+			return
+		}
+
+		log.Printf("Attempting to delete team: %s", id)
+
+		// Start a transaction
+		err := db.Transaction(func(tx *gorm.DB) error {
+			// 1. Delete Players
+			if err := tx.Where("team_id = ?", id).Delete(&Player{}).Error; err != nil {
+				return err
+			}
+
+			// 2. Delete Team
+			if err := tx.Where("id = ?", id).Delete(&Team{}).Error; err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("Failed to delete team %s: %v", id, err)
+			http.Error(w, "Failed to delete team: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -144,9 +183,26 @@ func main() {
 	}
 
 	// Auto Migrate
-	err = db.AutoMigrate(&Team{}, &Player{}, &Match{})
+	err = db.AutoMigrate(&Team{}, &Player{}, &Match{}, &SiteConfig{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
+	}
+
+	// Seed default config
+	var configCount int64
+	db.Model(&SiteConfig{}).Count(&configCount)
+	if configCount == 0 {
+		db.Create(&SiteConfig{
+			Title:             "Zone 01 Oujda",
+			Subtitle:          "RFL 2026",
+			HeroSubtitle:      "Zone 01 Oujda • School Tournament 2026",
+			HeroTitle1:        "RAMADAN",
+			HeroTitle2:        "FOOTBALL",
+			HeroTitle3:        "LEAGUE",
+			LogoPath:          "", // Default/Empty
+			AutoUpdateMatches: true,
+			MatchStage:        "League Match",
+		})
 	}
 
 	// Serve static files from the frontend build directory
@@ -187,9 +243,11 @@ func main() {
 	http.HandleFunc("/api/register", handleRegister)
 	http.HandleFunc("/api/teams", handleListTeams)
 	http.HandleFunc("/api/matches", handleListMatches) // Public
+	http.HandleFunc("/api/config", handleGetConfig)    // Public
 
 	// Admin Endpoints
 	http.HandleFunc("/api/admin/login", handleAdminLogin)
+	http.Handle("/api/admin/config", adminMiddleware(http.HandlerFunc(handleAdminConfig))) // Update config
 	http.Handle("/api/admin/matches", adminMiddleware(http.HandlerFunc(handleAdminMatches)))
 	http.Handle("/api/admin/teams", adminMiddleware(http.HandlerFunc(handleAdminTeams)))     // For delete/update
 	http.Handle("/api/admin/players", adminMiddleware(http.HandlerFunc(handleAdminPlayers))) // For delete/update
@@ -213,7 +271,95 @@ type Match struct {
 	HomeScore  int    `json:"homeScore"`
 	AwayScore  int    `json:"awayScore"`
 	Status     string `json:"status"`                  // scheduled, live, finished
+	Round      string `json:"round"`                   // QF1, QF2, SF1, SF2, Final
 	EventsJSON string `json:"events" gorm:"type:text"` // Simple JSON storage for events
+}
+
+func handleGetConfig(w http.ResponseWriter, r *http.Request) {
+	var config SiteConfig
+	if result := db.First(&config); result.Error != nil {
+		// Should have been seeded, but fallback
+		config = SiteConfig{Title: "Zone 01 Oujda", Subtitle: "RFL 2026"}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(config)
+}
+
+func handleAdminConfig(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == http.MethodPut {
+		// Handle multipart form for logo upload
+		err := r.ParseMultipartForm(10 << 20) // 10 MB
+		if err != nil {
+			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			return
+		}
+
+		title := r.FormValue("title")
+		subtitle := r.FormValue("subtitle")
+		heroSubtitle := r.FormValue("heroSubtitle")
+		heroTitle1 := r.FormValue("heroTitle1")
+		heroTitle2 := r.FormValue("heroTitle2")
+		heroTitle3 := r.FormValue("heroTitle3")
+		autoUpdateMatches := r.FormValue("autoUpdateMatches")
+		featuredMatchId := r.FormValue("featuredMatchId")
+		matchStage := r.FormValue("matchStage")
+
+		var config SiteConfig
+		if result := db.First(&config); result.Error != nil {
+			config = SiteConfig{} // Create new if not exists (should accept ID 1)
+		}
+
+		if title != "" {
+			config.Title = title
+		}
+		if subtitle != "" {
+			config.Subtitle = subtitle
+		}
+		if heroSubtitle != "" {
+			config.HeroSubtitle = heroSubtitle
+		}
+		if heroTitle1 != "" {
+			config.HeroTitle1 = heroTitle1
+		}
+		if heroTitle2 != "" {
+			config.HeroTitle2 = heroTitle2
+		}
+		if heroTitle3 != "" {
+			config.HeroTitle3 = heroTitle3
+		}
+		if autoUpdateMatches != "" {
+			config.AutoUpdateMatches = autoUpdateMatches == "true"
+		}
+		// Always update featuredMatchId, allowing it to be empty
+		config.FeaturedMatchID = featuredMatchId
+		if matchStage != "" {
+			config.MatchStage = matchStage
+		}
+
+		// Handle Logo Upload
+		file, header, err := r.FormFile("logo")
+		if err == nil {
+			defer file.Close()
+			filename := fmt.Sprintf("site_logo_%d_%s", time.Now().UnixNano(), header.Filename)
+			dstPath := filepath.Join(uploadsDir, filename)
+			dst, err := os.Create(dstPath)
+			if err != nil {
+				http.Error(w, "Failed to save logo", http.StatusInternalServerError)
+				return
+			}
+			defer dst.Close()
+			io.Copy(dst, file)
+			config.LogoPath = "/uploads/" + filename
+		}
+
+		db.Save(&config)
+		json.NewEncoder(w).Encode(config)
+		return
+	}
+
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
 func handleStatus(w http.ResponseWriter, r *http.Request) {
@@ -400,7 +546,17 @@ func handleAdminMatches(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodDelete {
 		id := r.URL.Query().Get("id")
-		db.Delete(&Match{}, "id = ?", id)
+		if id == "" {
+			http.Error(w, "Missing match ID", http.StatusBadRequest)
+			return
+		}
+
+		if err := db.Where("id = ?", id).Delete(&Match{}).Error; err != nil {
+			log.Printf("Failed to delete match %s: %v", id, err)
+			http.Error(w, "Failed to delete match", http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 		return
 	}

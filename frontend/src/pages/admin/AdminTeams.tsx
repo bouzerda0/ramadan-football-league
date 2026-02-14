@@ -21,6 +21,7 @@ export default function AdminTeams() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchTeams();
@@ -31,7 +32,7 @@ export default function AdminTeams() {
             const response = await fetch("/api/teams");
             if (response.ok) {
                 const data = await response.json();
-                setTeams(data);
+                setTeams(data || []);
             }
         } catch (error) {
             console.error("Failed to fetch teams:", error);
@@ -40,20 +41,23 @@ export default function AdminTeams() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this team? This action fails if not logged in.")) return;
+    const confirmDelete = async () => {
+        if (!deleteId) return;
 
         try {
-            const response = await fetch(`/api/admin/teams?id=${id}`, {
+            const response = await fetch(`/api/admin/teams?id=${deleteId}`, {
                 method: 'DELETE',
             });
             if (response.ok) {
+                setDeleteId(null);
                 fetchTeams(); // Refresh list
             } else {
-                alert("Failed to delete team. Ensure you are logged in.");
+                const errText = await response.text();
+                alert(`Failed to delete team: ${errText}`);
             }
         } catch (error) {
             console.error("Failed to delete team:", error);
+            alert("Failed to delete team. Check console for details.");
         }
     };
 
@@ -122,7 +126,7 @@ export default function AdminTeams() {
                                     <Edit className="w-5 h-5" />
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(team.id)}
+                                    onClick={() => setDeleteId(team.id)}
                                     className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                                     title="Delete Team"
                                 >
@@ -131,6 +135,30 @@ export default function AdminTeams() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="bg-[#141B2D] w-full max-w-sm rounded-2xl border border-red-500/20 p-6">
+                        <h3 className="text-xl font-bold text-[#F4F6FA] mb-4">Delete Team?</h3>
+                        <p className="text-[#A9B3C7] mb-6">Are you sure you want to delete this team? This action cannot be undone.</p>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="px-4 py-2 bg-[#141B2D] border border-[#D4A018]/20 rounded-lg hover:bg-[#141B2D]/80 transition-colors text-[#F4F6FA]"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition-colors"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -1,23 +1,107 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { usePrayerTimes } from '@/hooks/usePrayerTimes';
-import { teams, getTeamById } from '@/data/leagueData';
 import { ChevronDown, Moon, Star, Clock } from 'lucide-react';
+import type { Team } from '@/types';
 
 export default function Hero() {
   const { t, dir } = useLanguage();
+  const { config } = useSiteConfig();
   const { timeToIftar } = usePrayerTimes();
+  const [teams, setTeams] = useState<Team[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
+  const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
+
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 100);
-    return () => clearTimeout(timer);
+    const fetchTeams = async () => {
+      try {
+        const res = await fetch('/api/teams');
+        if (res.ok) {
+          const data: any[] = await res.json();
+          // Map backend teams to frontend structure
+          const mappedTeams: Team[] = data.map((t, index) => ({
+            id: t.id,
+            name: t.teamName,
+            shortName: t.teamName.substring(0, 3).toUpperCase(),
+            logo: t.logoPath || '',
+            cohort: 'Cohort ' + String.fromCharCode(65 + index), // A, B, C...
+            captain: t.captainName,
+            motto: '',
+            colors: {
+              primary: colors[index % colors.length],
+              secondary: '#F4F6FA'
+            },
+            squad: [],
+            stats: { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, form: [], ramadanSpirit: 0 },
+            qrCode: ''
+          }));
+
+          // Fill with placeholders up to 6
+          const displayTeams = [...mappedTeams];
+          while (displayTeams.length < 6) {
+            const i = displayTeams.length;
+            displayTeams.push({
+              id: `placeholder-${i}`,
+              name: `Team ${i + 1}`,
+              shortName: `TM${i + 1}`,
+              logo: '',
+              cohort: '',
+              captain: '',
+              motto: '',
+              colors: { primary: '#1F2937', secondary: '#9CA3AF' }, // Gray
+              squad: [],
+              stats: { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, form: [], ramadanSpirit: 0 },
+              qrCode: ''
+            });
+          }
+          setTeams(displayTeams);
+        } else {
+          // Fallback to placeholders if fetch fails or no teams
+          const placeholders = Array(6).fill(null).map((_, i) => ({
+            id: `placeholder-${i}`,
+            name: `Team ${i + 1}`,
+            shortName: `TM${i + 1}`,
+            logo: '',
+            cohort: '',
+            captain: '',
+            motto: '',
+            colors: { primary: '#1F2937', secondary: '#9CA3AF' },
+            squad: [],
+            stats: { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, form: [], ramadanSpirit: 0 },
+            qrCode: ''
+          })) as Team[];
+          setTeams(placeholders);
+        }
+      } catch (err) {
+        console.error("Failed to fetch teams", err);
+        // Fallback
+        const placeholders = Array(6).fill(null).map((_, i) => ({
+          id: `placeholder-${i}`,
+          name: `Team ${i + 1}`,
+          shortName: `TM${i + 1}`,
+          logo: '',
+          cohort: '',
+          captain: '',
+          motto: '',
+          colors: { primary: '#1F2937', secondary: '#9CA3AF' },
+          squad: [],
+          stats: { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, form: [], ramadanSpirit: 0 },
+          qrCode: ''
+        })) as Team[];
+        setTeams(placeholders);
+      }
+      setIsLoaded(true);
+    };
+
+    fetchTeams();
   }, []);
 
   const nextMatch = {
-    home: getTeamById('team1'),
-    away: getTeamById('team4'),
+    home: teams[0],
+    away: teams[3],
     date: 'April 3, 2026',
     time: '19:30',
   };
@@ -81,7 +165,7 @@ export default function Hero() {
                 }`}
             >
               <Star className="w-4 h-4 text-[#D4A018]" fill="currentColor" />
-              <span className="text-sm font-ui text-[#D4A018]">Zone 01 Oujda 2026</span>
+              <span className="text-sm font-ui text-[#D4A018]">Zone 01 Oujda 202</span>
               <Star className="w-4 h-4 text-[#D4A018]" fill="currentColor" />
             </div>
           </div>
@@ -92,15 +176,16 @@ export default function Hero() {
               className={`font-display font-black text-[#F4F6FA] transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
             >
-              <span className="block text-hero tracking-tight">{t('hero.ramadan')}</span>
-              <span className="block text-hero text-gold-gradient tracking-tight">{t('hero.football')}</span>
-              <span className="block text-hero tracking-tight">{t('hero.league')}</span>
+
+              <span className="block text-hero tracking-tight">{config.heroTitle1 || t('hero.ramadan')}</span>
+              <span className="block text-hero text-gold-gradient tracking-tight">{config.heroTitle2 || t('hero.football')}</span>
+              <span className="block text-hero tracking-tight">{config.heroTitle3 || t('hero.league')}</span>
             </h1>
             <p
               className={`mt-4 text-lg text-[#A9B3C7] font-ui transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
             >
-              {t('hero.subtitle')}
+              {config.heroSubtitle || t('hero.subtitle')}
             </p>
           </div>
 

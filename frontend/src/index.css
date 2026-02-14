@@ -94,7 +94,7 @@
 
   /* Card with Gold Border */
   .card-gold {
-    @apply bg-[#141B2D]/80 backdrop-blur-sm;
+    @apply bg-[#141B2D]/90;
     border: 1px solid rgba(212, 160, 24, 0.25);
   }
 

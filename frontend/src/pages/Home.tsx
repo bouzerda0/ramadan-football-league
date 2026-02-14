@@ -9,6 +9,7 @@ import RamadanSpirit from '@/sections/RamadanSpirit';
 import Gallery from '@/sections/Gallery';
 import PrayerTimes from '@/sections/PrayerTimes';
 import Registration from '@/sections/Registration';
+import TournamentBracket from '@/sections/TournamentBracket';
 
 export default function Home() {
     return (
@@ -21,7 +22,11 @@ export default function Home() {
                 <Hero />
 
                 {/* Match of the Day */}
+                {/* Match of the Day */}
                 <MatchOfTheDay />
+
+                {/* Tournament Bracket */}
+                <TournamentBracket />
 
                 {/* Standings Table */}
                 <Standings />
