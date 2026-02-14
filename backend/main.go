@@ -279,6 +279,7 @@ func main() {
 	http.HandleFunc("/api/register", handleRegister)
 	http.HandleFunc("/api/teams", handleListTeams)
 	http.HandleFunc("/api/matches", handleListMatches)
+	http.HandleFunc("/api/standings", handleStandings)
 	http.HandleFunc("/api/config", handleGetConfig)
 
 	// Admin Endpoints
@@ -322,6 +323,117 @@ func handleListTeams(w http.ResponseWriter, r *http.Request) {
 	if result.Error != nil {
 		http.Error(w, "Failed to fetch teams", http.StatusInternalServerError)
 		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(teams)
+}
+
+// handleStandings computes team standings from finished match results
+func handleStandings(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Load all teams
+	var teams []Team
+	if result := db.Preload("Players").Find(&teams); result.Error != nil {
+		http.Error(w, "Failed to fetch teams", http.StatusInternalServerError)
+		return
+	}
+
+	// Load all finished matches
+	var matches []Match
+	db.Where("status = ?", "finished").Find(&matches)
+
+	// Build a map of team ID -> index for quick lookup
+	teamMap := make(map[string]int)
+	for i := range teams {
+		teamMap[teams[i].ID] = i
+		// Reset computed stats
+		teams[i].Played = 0
+		teams[i].Won = 0
+		teams[i].Drawn = 0
+		teams[i].Lost = 0
+		teams[i].GoalsFor = 0
+		teams[i].GoalsAgainst = 0
+		teams[i].GoalDifference = 0
+		teams[i].Points = 0
+		teams[i].Form = []string{}
+	}
+
+	// Compute stats from finished matches
+	for _, m := range matches {
+		homeIdx, homeOk := teamMap[m.HomeTeamID]
+		awayIdx, awayOk := teamMap[m.AwayTeamID]
+
+		if homeOk {
+			teams[homeIdx].Played++
+			teams[homeIdx].GoalsFor += m.HomeScore
+			teams[homeIdx].GoalsAgainst += m.AwayScore
+
+			if m.HomeScore > m.AwayScore {
+				teams[homeIdx].Won++
+				teams[homeIdx].Points += 3
+				teams[homeIdx].Form = append(teams[homeIdx].Form, "W")
+			} else if m.HomeScore == m.AwayScore {
+				teams[homeIdx].Drawn++
+				teams[homeIdx].Points += 1
+				teams[homeIdx].Form = append(teams[homeIdx].Form, "D")
+			} else {
+				teams[homeIdx].Lost++
+				teams[homeIdx].Form = append(teams[homeIdx].Form, "L")
+			}
+		}
+
+		if awayOk {
+			teams[awayIdx].Played++
+			teams[awayIdx].GoalsFor += m.AwayScore
+			teams[awayIdx].GoalsAgainst += m.HomeScore
+
+			if m.AwayScore > m.HomeScore {
+				teams[awayIdx].Won++
+				teams[awayIdx].Points += 3
+				teams[awayIdx].Form = append(teams[awayIdx].Form, "W")
+			} else if m.AwayScore == m.HomeScore {
+				teams[awayIdx].Drawn++
+				teams[awayIdx].Points += 1
+				teams[awayIdx].Form = append(teams[awayIdx].Form, "D")
+			} else {
+				teams[awayIdx].Lost++
+				teams[awayIdx].Form = append(teams[awayIdx].Form, "L")
+			}
+		}
+	}
+
+	// Finalize: goal difference, trim form to last 5
+	for i := range teams {
+		teams[i].GoalDifference = teams[i].GoalsFor - teams[i].GoalsAgainst
+		if len(teams[i].Form) > 5 {
+			teams[i].Form = teams[i].Form[len(teams[i].Form)-5:]
+		}
+	}
+
+	// Sort: points desc, then goal difference desc, then goals for desc
+	for i := 0; i < len(teams); i++ {
+		for j := i + 1; j < len(teams); j++ {
+			swap := false
+			if teams[j].Points > teams[i].Points {
+				swap = true
+			} else if teams[j].Points == teams[i].Points {
+				if teams[j].GoalDifference > teams[i].GoalDifference {
+					swap = true
+				} else if teams[j].GoalDifference == teams[i].GoalDifference {
+					if teams[j].GoalsFor > teams[i].GoalsFor {
+						swap = true
+					}
+				}
+			}
+			if swap {
+				teams[i], teams[j] = teams[j], teams[i]
+			}
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

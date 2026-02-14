@@ -11,7 +11,7 @@ export default function Standings() {
   const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
-    fetch('/api/teams')
+    fetch('/api/standings')
       .then(res => res.json())
       .then((data: BackendTeam[]) => {
         try {
@@ -126,93 +126,130 @@ export default function Standings() {
 
             {/* Table Body */}
             <div className="divide-y divide-[#D4A018]/10">
-              {teams.map((team: Team, index: number) => {
-                const gd = team.stats.goalDifference;
-                return (
-                  <div
-                    key={team.id}
-                    className={`grid grid-cols-12 gap-2 p-4 items-center table-row-hover transition-all duration-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
-                      }`}
-                    style={{ transitionDelay: `${300 + index * 100}ms` }}
-                  >
-                    {/* Rank */}
-                    <div className="col-span-1 text-center">
-                      {index === 0 ? (
-                        <div className="w-6 h-6 rounded-full bg-[#D4A018] flex items-center justify-center mx-auto">
-                          <Trophy className="w-3 h-3 text-[#0B0F1C]" />
-                        </div>
-                      ) : index === 1 ? (
-                        <span className="w-6 h-6 rounded-full bg-[#A9B3C7]/30 flex items-center justify-center text-sm font-bold text-[#A9B3C7] inline-flex">
-                          2
-                        </span>
-                      ) : index === 2 ? (
-                        <span className="w-6 h-6 rounded-full bg-[#B38914]/30 flex items-center justify-center text-sm font-bold text-[#B38914] inline-flex">
-                          3
-                        </span>
-                      ) : (
-                        <span className="text-sm text-[#6B7280]">{index + 1}</span>
-                      )}
-                    </div>
-
-                    {/* Team */}
-                    <div className="col-span-4 md:col-span-3 flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 bg-[#333] overflow-hidden"
-                      >
-                        {team.logo ? <img src={team.logo} className="w-full h-full object-cover" /> : (team.name ? team.name[0] : '?')}
+              {teams.length === 0 ? (
+                /* Professional empty state with placeholder rows */
+                <div className="p-8">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="grid grid-cols-12 gap-2 p-4 items-center opacity-30">
+                      <div className="col-span-1 text-center">
+                        <span className="w-6 h-6 rounded-full bg-[#A9B3C7]/10 flex items-center justify-center text-sm text-[#6B7280] mx-auto">{i}</span>
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-[#F4F6FA] truncate">{team.name}</p>
-                        <p className="text-xs text-[#6B7280] hidden sm:block">{team.captain}</p>
+                      <div className="col-span-4 md:col-span-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#A9B3C7]/10 animate-pulse" />
+                        <div className="h-4 w-24 bg-[#A9B3C7]/10 rounded animate-pulse" />
+                      </div>
+                      <div className="col-span-1 text-center hidden md:block text-[#6B7280]">--</div>
+                      <div className="col-span-1 text-center text-[#6B7280]">--</div>
+                      <div className="col-span-1 text-center text-[#6B7280]">--</div>
+                      <div className="col-span-1 text-center text-[#6B7280]">--</div>
+                      <div className="col-span-1 text-center hidden md:block text-[#6B7280]">--</div>
+                      <div className="col-span-1 text-center hidden md:block text-[#6B7280]">--</div>
+                      <div className="col-span-1 text-center text-[#6B7280]">--</div>
+                      <div className="col-span-2 md:col-span-1 text-center">
+                        <span className="inline-flex items-center justify-center w-10 h-8 rounded-lg bg-[#A9B3C7]/5 text-[#6B7280]">--</span>
                       </div>
                     </div>
-
-                    {/* Matches Played */}
-                    <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
-                      {team.stats.played}
-                    </div>
-
-                    {/* Wins */}
-                    <div className="col-span-1 text-center text-emerald-400 font-semibold">
-                      {team.stats.won}
-                    </div>
-
-                    {/* Draws */}
-                    <div className="col-span-1 text-center text-amber-400 font-semibold">
-                      {team.stats.drawn}
-                    </div>
-
-                    {/* Losses */}
-                    <div className="col-span-1 text-center text-red-400 font-semibold">
-                      {team.stats.lost}
-                    </div>
-
-                    {/* Goals For */}
-                    <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
-                      {team.stats.goalsFor}
-                    </div>
-
-                    {/* Goals Against */}
-                    <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
-                      {team.stats.goalsAgainst}
-                    </div>
-
-                    {/* Goal Difference */}
-                    <div className={`col-span-1 text-center font-semibold ${gd > 0 ? 'text-emerald-400' :
-                      gd < 0 ? 'text-red-400' : 'text-[#A9B3C7]'
-                      }`}>
-                      {gd > 0 ? `+${gd}` : gd}
-                    </div>
-
-                    {/* Points */}
-                    <div className="col-span-2 md:col-span-1 text-center">
-                      <span className="inline-flex items-center justify-center w-10 h-8 rounded-lg bg-[#D4A018]/20 text-[#D4A018] font-bold">
-                        {team.stats.points}
-                      </span>
-                    </div>
+                  ))}
+                  <div className="text-center py-6">
+                    <p className="text-[#A9B3C7] font-semibold">No standings data yet</p>
+                    <p className="text-sm text-[#6B7280] mt-1">Teams will appear here once matches are played</p>
                   </div>
-                );
-              })}
+                </div>
+              ) : (
+                teams.map((team: Team, index: number) => {
+                  const gd = team.stats.goalDifference;
+                  return (
+                    <div
+                      key={team.id}
+                      className={`grid grid-cols-12 gap-2 p-4 items-center table-row-hover transition-all duration-500 group ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+                        } ${index === 0 ? 'bg-[#D4A018]/5' : ''}`}
+                      style={{ transitionDelay: `${300 + index * 100}ms` }}
+                    >
+                      {/* Rank */}
+                      <div className="col-span-1 text-center">
+                        {index === 0 ? (
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#D4A018] to-[#B38612] flex items-center justify-center mx-auto shadow-lg shadow-[#D4A018]/20">
+                            <Trophy className="w-3.5 h-3.5 text-[#0B0F1C]" />
+                          </div>
+                        ) : index === 1 ? (
+                          <span className="w-7 h-7 rounded-full bg-[#A9B3C7]/20 flex items-center justify-center text-sm font-bold text-[#A9B3C7] inline-flex mx-auto">
+                            2
+                          </span>
+                        ) : index === 2 ? (
+                          <span className="w-7 h-7 rounded-full bg-[#B38914]/20 flex items-center justify-center text-sm font-bold text-[#B38914] inline-flex mx-auto">
+                            3
+                          </span>
+                        ) : (
+                          <span className="text-sm text-[#6B7280]">{index + 1}</span>
+                        )}
+                      </div>
+
+                      {/* Team */}
+                      <div className="col-span-4 md:col-span-3 flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden transition-transform duration-300 group-hover:scale-110"
+                          style={{ backgroundColor: team.colors?.primary || '#333' }}
+                        >
+                          {team.logo ? <img src={team.logo} className="w-full h-full object-cover" /> : (
+                            <span className="text-white">{team.name ? team.name[0] : '?'}</span>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className={`font-semibold truncate ${index === 0 ? 'text-[#D4A018]' : 'text-[#F4F6FA]'}`}>{team.name}</p>
+                          <p className="text-xs text-[#6B7280] hidden sm:block">{team.cohort}</p>
+                        </div>
+                      </div>
+
+                      {/* Matches Played */}
+                      <div className="col-span-1 text-center hidden md:block text-[#A9B3C7] font-medium">
+                        {team.stats.played}
+                      </div>
+
+                      {/* Wins */}
+                      <div className="col-span-1 text-center text-emerald-400 font-semibold">
+                        {team.stats.won}
+                      </div>
+
+                      {/* Draws */}
+                      <div className="col-span-1 text-center text-amber-400 font-semibold">
+                        {team.stats.drawn}
+                      </div>
+
+                      {/* Losses */}
+                      <div className="col-span-1 text-center text-red-400 font-semibold">
+                        {team.stats.lost}
+                      </div>
+
+                      {/* Goals For */}
+                      <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
+                        {team.stats.goalsFor}
+                      </div>
+
+                      {/* Goals Against */}
+                      <div className="col-span-1 text-center hidden md:block text-[#A9B3C7]">
+                        {team.stats.goalsAgainst}
+                      </div>
+
+                      {/* Goal Difference */}
+                      <div className={`col-span-1 text-center font-semibold ${gd > 0 ? 'text-emerald-400' :
+                        gd < 0 ? 'text-red-400' : 'text-[#A9B3C7]'
+                        }`}>
+                        {gd > 0 ? `+${gd}` : gd}
+                      </div>
+
+                      {/* Points */}
+                      <div className="col-span-2 md:col-span-1 text-center">
+                        <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg font-bold ${index === 0
+                            ? 'bg-[#D4A018]/20 text-[#D4A018] shadow-sm shadow-[#D4A018]/10'
+                            : 'bg-[#A9B3C7]/10 text-[#F4F6FA]'
+                          }`}>
+                          {team.stats.points}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

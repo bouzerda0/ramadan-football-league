@@ -5,7 +5,6 @@ import MatchOfTheDay from '@/sections/MatchOfTheDay';
 import Standings from '@/sections/Standings';
 import PlayerStats from '@/sections/PlayerStats';
 import Schedule from '@/sections/Schedule';
-import RamadanSpirit from '@/sections/RamadanSpirit';
 import Gallery from '@/sections/Gallery';
 import PrayerTimes from '@/sections/PrayerTimes';
 import Registration from '@/sections/Registration';
@@ -37,8 +36,7 @@ export default function Home() {
                 {/* Schedule */}
                 <Schedule />
 
-                {/* Ramadan Spirit Leaderboard */}
-                <RamadanSpirit />
+
 
                 {/* Gallery */}
                 <Gallery />
