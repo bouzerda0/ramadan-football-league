@@ -11,25 +11,27 @@ export default function AdminLogin() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
         try {
             const response = await fetch('/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
                 body: JSON.stringify({ username, password }),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
-                // Cookie is set by backend
-                // Force reload or update state to reflect auth
-                // For simple cookie auth, backend sets it, we just navigate
-                // We might need to manually set a flag for client-side routing if not using a real auth provider
-                document.cookie = "admin_token=secret-admin-token; path=/"; // Client side backup for the layout check
+                // Set cookie client-side for the AdminLayout auth check
+                document.cookie = "admin_token=secret-admin-token; path=/";
                 navigate('/admin/dashboard');
             } else {
-                setError('Invalid credentials');
+                setError(data?.error || data?.message || 'Invalid credentials');
             }
-        } catch {
-            setError('Login failed');
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('Login failed - network error');
         }
     };
 

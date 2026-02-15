@@ -34,8 +34,10 @@ export default function TournamentBracket() {
                 ]);
 
                 if (matchesRes.ok && teamsRes.ok) {
-                    const matchesData = await matchesRes.json();
-                    const teamsData = await teamsRes.json();
+                    const matchesJson = await matchesRes.json();
+                    const teamsJson = await teamsRes.json();
+                    const matchesData = Array.isArray(matchesJson) ? matchesJson : (matchesJson.data || []);
+                    const teamsData = Array.isArray(teamsJson) ? teamsJson : (teamsJson.data || []);
                     setMatches(matchesData);
                     setTeams(teamsData);
                 }

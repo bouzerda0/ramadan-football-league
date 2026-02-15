@@ -144,3 +144,16 @@ export interface BackendTeam {
   form?: string[];
   ramadanSpirit?: number;
 }
+
+export interface SiteConfig {
+  title: string;
+  subtitle: string;
+  heroSubtitle: string;
+  heroTitle1: string;
+  heroTitle2: string;
+  heroTitle3: string;
+  logoPath: string;
+  autoUpdateMatches: boolean;
+  featuredMatchId: string;
+  matchStage: string;
+}

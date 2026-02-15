@@ -13,7 +13,8 @@ export default function Standings() {
   useEffect(() => {
     fetch('/api/standings')
       .then(res => res.json())
-      .then((data: BackendTeam[]) => {
+      .then((json) => {
+        const data: BackendTeam[] = Array.isArray(json) ? json : (json.data || []);
         try {
           if (!Array.isArray(data)) return;
           const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
@@ -240,8 +241,8 @@ export default function Standings() {
                       {/* Points */}
                       <div className="col-span-2 md:col-span-1 text-center">
                         <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg font-bold ${index === 0
-                            ? 'bg-[#D4A018]/20 text-[#D4A018] shadow-sm shadow-[#D4A018]/10'
-                            : 'bg-[#A9B3C7]/10 text-[#F4F6FA]'
+                          ? 'bg-[#D4A018]/20 text-[#D4A018] shadow-sm shadow-[#D4A018]/10'
+                          : 'bg-[#A9B3C7]/10 text-[#F4F6FA]'
                           }`}>
                           {team.stats.points}
                         </span>

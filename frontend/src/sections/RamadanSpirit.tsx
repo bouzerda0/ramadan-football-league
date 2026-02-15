@@ -13,7 +13,8 @@ export default function RamadanSpirit() {
   useEffect(() => {
     fetch('/api/teams')
       .then(res => res.json())
-      .then((data: BackendTeam[]) => {
+      .then((json) => {
+        const data: BackendTeam[] = Array.isArray(json) ? json : (json.data || []);
         const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
         const mappedTeams: Team[] = data.map((t, index) => ({
           id: t.id,

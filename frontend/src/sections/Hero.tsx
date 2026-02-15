@@ -39,7 +39,8 @@ export default function Hero() {
         const res = await fetch('/api/teams');
         console.log('Hero: Fetch Status', res.status);
         if (res.ok) {
-          const data = await res.json();
+          const json = await res.json();
+          const data = Array.isArray(json) ? json : (json.data || []);
           console.log('Hero: Data received', data);
 
           if (!Array.isArray(data)) {

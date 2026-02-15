@@ -683,7 +683,7 @@ export default function AdminMatches() {
                                         disabled={!newEvent.teamId}
                                     >
                                         <option value="">Player</option>
-                                        {getTeamPlayers(newEvent.teamId || '').map((p: any) => (
+                                        {getTeamPlayers(newEvent.teamId || '').map((p: Player) => (
                                             <option key={p.id} value={p.id}>{p.name}</option>
                                         ))}
                                     </select>
@@ -695,7 +695,7 @@ export default function AdminMatches() {
                                             disabled={!newEvent.teamId}
                                         >
                                             <option value="">Assist (opt)</option>
-                                            {getTeamPlayers(newEvent.teamId || '').map((p: any) => (
+                                            {getTeamPlayers(newEvent.teamId || '').map((p: Player) => (
                                                 <option key={p.id} value={p.id}>{p.name}</option>
                                             ))}
                                         </select>

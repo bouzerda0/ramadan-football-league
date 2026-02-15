@@ -16,7 +16,8 @@ export default function PlayerStats() {
   useEffect(() => {
     fetch('/api/teams')
       .then(res => res.json())
-      .then((data: BackendTeam[]) => {
+      .then((json) => {
+        const data: BackendTeam[] = Array.isArray(json) ? json : (json.data || []);
         const allPlayers: BackendPlayer[] = [];
         const teamsMap: Record<string, BackendTeam> = {};
 

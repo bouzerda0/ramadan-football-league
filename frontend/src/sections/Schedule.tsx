@@ -42,12 +42,13 @@ export default function Schedule() {
         ]);
 
         if (matchesRes.ok) {
-          const matchesData = await matchesRes.json();
-          setMatches(matchesData);
+          const matchesJson = await matchesRes.json();
+          setMatches(Array.isArray(matchesJson) ? matchesJson : (matchesJson.data || []));
         }
 
         if (teamsRes.ok) {
-          const teamsData = await teamsRes.json();
+          const teamsJson = await teamsRes.json();
+          const teamsData = Array.isArray(teamsJson) ? teamsJson : (teamsJson.data || []);
           const teamsMap: Record<string, Team> = {};
           teamsData.forEach((team: Team) => {
             teamsMap[team.id] = team;

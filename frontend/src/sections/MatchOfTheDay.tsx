@@ -43,8 +43,10 @@ export default function MatchOfTheDay() {
         ]);
 
         if (matchesRes.ok && teamsRes.ok) {
-          const matches: GlobalMatch[] = await matchesRes.json();
-          const teams: BackendTeam[] = await teamsRes.json();
+          const matchesJson = await matchesRes.json();
+          const teamsJson = await teamsRes.json();
+          const matches: GlobalMatch[] = Array.isArray(matchesJson) ? matchesJson : (matchesJson.data || []);
+          const teams: BackendTeam[] = Array.isArray(teamsJson) ? teamsJson : (teamsJson.data || []);
 
           if (matches.length === 0) {
             setMatch(null);

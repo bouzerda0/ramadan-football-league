@@ -50,7 +50,8 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         try {
             const res = await fetch('/api/config');
             if (res.ok) {
-                const data = await res.json();
+                const json = await res.json();
+                const data = json.data || json;
                 setConfig({
                     title: data.title || defaultConfig.title,
                     subtitle: data.subtitle || defaultConfig.subtitle,
