@@ -14,10 +14,16 @@ export default function AdminLogin() {
         e.preventDefault();
         setError('');
         try {
-            const response = await fetch(`${API_URL}/api/admin/login`, {
+            const loginUrl = `${API_URL}/api/admin/login`;
+            console.log('Attempting login to:', loginUrl);
+
+            const response = await fetch(loginUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'same-origin',
+                // 'include' sends cookies with cross-origin requests (needed if backend sets cookies)
+                // 'same-origin' is default but might fail if frontend/backend are on different subdomains
+                // For this specific case where we use a simple token, 'include' is safer if we ever use cookies
+                credentials: 'include',
                 body: JSON.stringify({ username, password }),
             });
 

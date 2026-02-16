@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { API_URL } from '@/lib/api';
+import { useState } from 'react';
 import { Save, Upload, Globe, Image, Trophy, RefreshCw } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
+import { API_URL } from '@/lib/api';
 
 export default function Settings() {
     const { config, isLoading, refreshConfig, updateLocalConfig } = useSiteConfig();
