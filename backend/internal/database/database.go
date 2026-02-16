@@ -7,6 +7,7 @@ import (
 
 	"ramadan-league/internal/models"
 
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -16,16 +17,30 @@ var DB *gorm.DB
 
 // Init initializes the database connection
 func Init(dbPath string) error {
-	// Ensure directory exists
-	dir := filepath.Dir(dbPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
+	var db *gorm.DB
+	var err error
+
+	// Check for DATABASE_URL environment variable (Railway provides this)
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL != "" {
+		log.Println("Connecting to PostgreSQL database...")
+		db, err = gorm.Open(postgres.Open(databaseURL), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
+	} else {
+		log.Println("Connecting to SQLite database...")
+		// Ensure directory exists
+		dir := filepath.Dir(dbPath)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return err
+		}
+
+		// Open database connection
+		db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
 	}
 
-	// Open database connection
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
 	if err != nil {
 		return err
 	}
