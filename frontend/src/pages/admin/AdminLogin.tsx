@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { API_URL } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 
@@ -13,7 +14,7 @@ export default function AdminLogin() {
         e.preventDefault();
         setError('');
         try {
-            const response = await fetch('/api/admin/login', {
+            const response = await fetch(`${API_URL}/api/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',

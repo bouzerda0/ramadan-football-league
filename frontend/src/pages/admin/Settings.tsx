@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { Save, Upload, Globe, Image, Trophy, RefreshCw } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 
@@ -15,7 +16,7 @@ export default function Settings() {
         setSaveMessage(null);
 
         try {
-            const response = await fetch('/api/admin/config', {
+            const response = await fetch(`${API_URL}/api/admin/config`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(config),
@@ -45,7 +46,7 @@ export default function Settings() {
         formData.append('subtitle', config.subtitle);
 
         try {
-            const response = await fetch('/api/admin/config', {
+            const response = await fetch(`${API_URL}/api/admin/config`, {
                 method: 'PUT',
                 body: formData,
             });

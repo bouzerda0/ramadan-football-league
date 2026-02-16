@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Heart, HandHeart, Users, Sparkles, Award } from 'lucide-react';
@@ -11,7 +12,7 @@ export default function RamadanSpirit() {
   const [spiritRanking, setSpiritRanking] = useState<Team[]>([]);
 
   useEffect(() => {
-    fetch('/api/teams')
+    fetch(`${API_URL}/api/teams`)
       .then(res => res.json())
       .then((json) => {
         const data: BackendTeam[] = Array.isArray(json) ? json : (json.data || []);

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 
 export type SiteConfig = {
     title: string;
@@ -48,7 +49,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const fetchConfig = async () => {
         try {
-            const res = await fetch('/api/config');
+            const res = await fetch(`${API_URL}/api/config`);
             if (res.ok) {
                 const json = await res.json();
                 const data = json.data || json;

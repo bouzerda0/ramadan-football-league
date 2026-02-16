@@ -2,6 +2,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Calendar, MapPin, Clock, CheckCircle2, PlayCircle, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 
 interface Team {
   id: string;
@@ -37,8 +38,8 @@ export default function Schedule() {
     const fetchData = async () => {
       try {
         const [matchesRes, teamsRes] = await Promise.all([
-          fetch('/api/matches'),
-          fetch('/api/teams'),
+          fetch(`${API_URL}/api/matches`),
+          fetch(`${API_URL}/api/teams`),
         ]);
 
         if (matchesRes.ok) {

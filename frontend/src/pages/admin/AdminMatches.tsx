@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { Plus, Save, Trash2, Edit, Calendar, X, Trophy, Clock, MapPin } from 'lucide-react';
 
 interface MatchEvent {
@@ -99,8 +100,8 @@ export default function AdminMatches() {
     const fetchData = async () => {
         try {
             const [matchesRes, teamsRes] = await Promise.all([
-                fetch('/api/admin/matches'),
-                fetch('/api/admin/teams'),
+                fetch(`${API_URL}/api/admin/matches`),
+                fetch(`${API_URL}/api/admin/teams`),
             ]);
 
             if (matchesRes.ok) {
@@ -129,7 +130,7 @@ export default function AdminMatches() {
         }
 
         try {
-            const response = await fetch('/api/admin/matches', {
+            const response = await fetch(`${API_URL}/api/admin/matches`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newMatch),
@@ -153,7 +154,7 @@ export default function AdminMatches() {
         if (!selectedMatch) return;
 
         try {
-            const response = await fetch('/api/admin/matches', {
+            const response = await fetch(`${API_URL}/api/admin/matches`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedMatch),
@@ -176,7 +177,7 @@ export default function AdminMatches() {
     const handleDeleteMatch = async () => {
         if (!selectedMatch) return;
         try {
-            const response = await fetch(`/api/admin/matches?id=${selectedMatch.id}`, {
+            const response = await fetch(`${API_URL}/api/admin/matches?id=${selectedMatch.id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {

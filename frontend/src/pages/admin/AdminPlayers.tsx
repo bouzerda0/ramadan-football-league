@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { Save, Search, TrendingUp, Shield, User, X } from 'lucide-react';
 
 interface Player {
@@ -50,7 +51,7 @@ export default function AdminPlayers() {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch('/api/admin/teams');
+            const response = await fetch(`${API_URL}/api/admin/teams`);
             if (response.ok) {
                 const result = await response.json();
                 // API returns { success: true, data: [...] }
@@ -71,7 +72,7 @@ export default function AdminPlayers() {
 
     const handleUpdatePlayer = async (teamId: string, playerId: string) => {
         try {
-            const response = await fetch('/api/admin/players', {
+            const response = await fetch(`${API_URL}/api/admin/players`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

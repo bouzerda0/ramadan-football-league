@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, Users, User, Phone, Mail, Trophy, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { API_URL } from '@/lib/api';
 
 // Form Schema
 const formSchema = z.object({
@@ -64,7 +65,7 @@ export default function RegistrationPage() {
                 formData.append("logo", logoFile);
             }
 
-            const response = await fetch("/api/register", {
+            const response = await fetch(`${API_URL}/api/register`, {
                 method: "POST",
                 body: formData,
             });

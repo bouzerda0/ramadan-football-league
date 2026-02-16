@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Trophy } from 'lucide-react';
@@ -28,7 +29,7 @@ export default function Standings() {
   useEffect(() => {
     const fetchStandings = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/teams');
+        const response = await fetch(`${API_URL}/api/teams`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch from Backend');
