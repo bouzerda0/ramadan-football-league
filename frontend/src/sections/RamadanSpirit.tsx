@@ -191,7 +191,7 @@ export default function RamadanSpirit() {
             <blockquote className="text-xl md:text-2xl font-display italic text-[#A9B3C7] max-w-2xl mx-auto">
               "The true champion is not measured by goals scored, but by the character shown on and off the pitch."
             </blockquote>
-            <p className="mt-4 text-sm text-[#6B7280]">— Zone 01 Oujda Philosophy</p>
+            <p className="mt-4 text-sm text-[#6B7280]">— UMPO Philosophy</p>
           </div>
         </div>
       </div>

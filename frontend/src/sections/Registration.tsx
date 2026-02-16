@@ -87,7 +87,7 @@ export default function Registration() {
                     <Trophy className="w-5 h-5 text-[#0B0F1C]" />
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-[#F4F6FA]">Zone 01 Oujda</h3>
+                    <h3 className="font-display font-bold text-[#F4F6FA]">UMPO</h3>
                     <p className="text-xs text-[#6B7280]">Ramadan Football League 2026</p>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export default function Registration() {
               <div className="flex items-center gap-4">
                 <span className="text-xs text-[#6B7280]">Made with</span>
                 <span className="text-[#D4A018]">♥</span>
-                <span className="text-xs text-[#6B7280]">for Zone 01 Oujda</span>
+                <span className="text-xs text-[#6B7280]">for UMPO</span>
               </div>
             </div>
           </footer>

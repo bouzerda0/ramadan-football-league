@@ -21,7 +21,7 @@ const translations = {
   'hero.ramadan': { ar: 'رمضان', fr: 'RAMADAN', en: 'RAMADAN' },
   'hero.football': { ar: 'كرة القدم', fr: 'FOOTBALL', en: 'FOOTBALL' },
   'hero.league': { ar: 'الدوري', fr: 'LEAGUE', en: 'LEAGUE' },
-  'hero.subtitle': { ar: 'زون 01 وجدة • بطولة المدرسة 2026', fr: 'Zone 01 Oujda • Tournoi Scolaire 2026', en: 'Zone 01 Oujda • School Tournament 2026' },
+  'hero.subtitle': { ar: 'زون 01 وجدة • بطولة المدرسة 2026', fr: 'UMPO • Tournoi Scolaire 2026', en: 'UMPO • School Tournament 2026' },
   'hero.cta': { ar: 'عرض الجدول', fr: 'Voir Calendrier', en: 'View Schedule' },
   'hero.meta': { ar: '6 فرق • دور المجموعات → خروج المغلوب • مباريات ما بعد الإفطار', fr: '6 équipes • Groupes → Élimination • Matchs post-Iftar', en: '6 teams • Group stage → Knockout • Post-Iftar matches' },
   'hero.nextMatch': { ar: 'المباراة القادمة', fr: 'Prochain Match', en: 'Next Match' },
@@ -71,7 +71,7 @@ const translations = {
 
   // Gallery
   'gallery.title': { ar: 'اللحظات', fr: 'MOMENTS', en: 'MOMENTS' },
-  'gallery.subtitle': { ar: 'أبرز ما بعد المباراة من زون 01 وجدة', fr: 'Moments post-match de Zone 01 Oujda', en: 'Post-match highlights from Zone 01 Oujda' },
+  'gallery.subtitle': { ar: 'أبرز ما بعد المباراة من زون 01 وجدة', fr: 'Moments post-match de UMPO', en: 'Post-match highlights from UMPO' },
 
   // Prayer Times
   'prayer.title': { ar: 'أوقات الصلاة', fr: 'HORAIRES PRIÈRE', en: 'PRAYER TIMES' },
@@ -97,7 +97,7 @@ const translations = {
 
   // Footer
   'footer.contact': { ar: 'تواصل معنا', fr: 'Contact', en: 'Contact' },
-  'footer.rights': { ar: '© 2026 زون 01 وجدة. جميع الحقوق محفوظة.', fr: '© 2026 Zone 01 Oujda. Tous droits réservés.', en: '© 2026 Zone 01 Oujda. All rights reserved.' },
+  'footer.rights': { ar: '© 2026 زون 01 وجدة. جميع الحقوق محفوظة.', fr: '© 2026 UMPO. Tous droits réservés.', en: '© 2026 UMPO. All rights reserved.' },
 
   // Admin
   'admin.title': { ar: 'لوحة التحكم', fr: 'Panneau Admin', en: 'Admin Panel' },

@@ -8,44 +8,44 @@ export default function Gallery() {
 
   // Placeholder gallery items - in production these would be actual images
   const galleryItems = [
-    { 
-      id: 1, 
-      title: 'Opening Match Ceremony', 
+    {
+      id: 1,
+      title: 'Opening Match Ceremony',
       date: 'March 28, 2026',
       description: 'The tournament kicks off with an exciting opening ceremony under the lights.',
       color: '#D4A018'
     },
-    { 
-      id: 2, 
-      title: 'Epic Goal Celebration', 
+    {
+      id: 2,
+      title: 'Epic Goal Celebration',
       date: 'March 30, 2026',
       description: 'Al-Mountakhab celebrates a stunning late equalizer.',
       color: '#10B981'
     },
-    { 
-      id: 3, 
-      title: 'Sportsmanship Moment', 
+    {
+      id: 3,
+      title: 'Sportsmanship Moment',
       date: 'March 31, 2026',
       description: 'Players from both teams shake hands after an intense match.',
       color: '#3B82F6'
     },
-    { 
-      id: 4, 
-      title: 'Night Pitch Atmosphere', 
+    {
+      id: 4,
+      title: 'Night Pitch Atmosphere',
       date: 'April 1, 2026',
-      description: 'The beautiful lights of Zone 01 Oujda pitch at night.',
+      description: 'The beautiful lights of UMPO pitch at night.',
       color: '#8B5CF6'
     },
-    { 
-      id: 5, 
-      title: 'Team Huddle', 
+    {
+      id: 5,
+      title: 'Team Huddle',
       date: 'March 29, 2026',
       description: 'Les Aigles strategizing before their crucial match.',
       color: '#EF4444'
     },
-    { 
-      id: 6, 
-      title: 'Fan Support', 
+    {
+      id: 6,
+      title: 'Fan Support',
       date: 'April 2, 2026',
       description: 'Amazing crowd support from all cohorts.',
       color: '#F59E0B'
@@ -69,10 +69,9 @@ export default function Gallery() {
       <div className="relative z-10 section-padding">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div 
-            className={`mb-12 transition-all duration-700 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
+          <div
+            className={`mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
           >
             <div className="flex items-center gap-3 mb-4">
               <Camera className="w-8 h-8 text-[#D4A018]" />
@@ -88,28 +87,27 @@ export default function Gallery() {
             {galleryItems.map((item, index) => (
               <div
                 key={item.id}
-                className={`group relative overflow-hidden rounded-2xl bg-[#141B2D] card-hover transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-                }`}
+                className={`group relative overflow-hidden rounded-2xl bg-[#141B2D] card-hover transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                  }`}
                 style={{ transitionDelay: `${200 + index * 100}ms` }}
               >
                 {/* Image Placeholder */}
-                <div 
+                <div
                   className="aspect-[4/3] relative overflow-hidden"
                   style={{ backgroundColor: `${item.color}15` }}
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div 
+                    <div
                       className="w-20 h-20 rounded-full flex items-center justify-center"
                       style={{ backgroundColor: `${item.color}30` }}
                     >
                       <ImageIcon className="w-10 h-10" style={{ color: item.color }} />
                     </div>
                   </div>
-                  
+
                   {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F1C] via-transparent to-transparent opacity-60" />
-                  
+
                   {/* Date Badge */}
                   <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[#0B0F1C]/80 backdrop-blur-sm">
                     <span className="text-xs text-[#F4F6FA]">{item.date}</span>
@@ -127,7 +125,7 @@ export default function Gallery() {
                 </div>
 
                 {/* Border Effect */}
-                <div 
+                <div
                   className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-[#D4A018]/30 transition-colors pointer-events-none"
                 />
               </div>
@@ -135,10 +133,9 @@ export default function Gallery() {
           </div>
 
           {/* Upload CTA */}
-          <div 
-            className={`mt-12 text-center transition-all duration-700 delay-700 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
+          <div
+            className={`mt-12 text-center transition-all duration-700 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
           >
             <p className="text-[#A9B3C7] mb-4">Have photos from the matches?</p>
             <button className="btn-secondary inline-flex items-center gap-2">

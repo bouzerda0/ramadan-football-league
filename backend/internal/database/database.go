@@ -20,44 +20,51 @@ func Init(dbPath string) error {
 	var db *gorm.DB
 	var err error
 
-	// Check for DATABASE_URL environment variable (Railway provides this)
+	// 1. Check for Railway PostgreSQL (Production)
 	databaseURL := os.Getenv("DATABASE_URL")
+
 	if databaseURL != "" {
-		log.Println("Connecting to PostgreSQL database...")
+		log.Println("🌍 Connecting to Railway PostgreSQL...")
 		db, err = gorm.Open(postgres.Open(databaseURL), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Silent),
+			Logger: logger.Default.LogMode(logger.Info), // بدلتها لـ Info باش تشوف الأخطاء إلا وقعو
 		})
 	} else {
-		log.Println("Connecting to SQLite database...")
-		// Ensure directory exists
+		// 2. Fallback to SQLite (Local / Development)
+		log.Println("📂 Connecting to SQLite (Pure Go)...")
+
 		dir := filepath.Dir(dbPath)
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return err
 		}
 
-		// Open database connection
 		db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Silent),
+			Logger: logger.Default.LogMode(logger.Info),
 		})
 	}
 
 	if err != nil {
+		log.Printf("❌ Fatal Database Error: %v", err)
 		return err
 	}
 
 	DB = db
+	log.Println("✅ Database connection established")
 
-	// Auto migrate models
+	// 3. Auto Migrate
+	log.Println("🔄 Running migrations...")
 	if err := migrate(); err != nil {
+		log.Printf("❌ Migration failed: %v", err)
 		return err
 	}
 
-	// Seed default data
+	// 4. Seed Data
+	log.Println("🌱 Seeding default data...")
 	if err := seed(); err != nil {
+		log.Printf("❌ Seeding failed: %v", err)
 		return err
 	}
 
-	log.Println("Database initialized successfully")
+	log.Println("🚀 Database initialized successfully")
 	return nil
 }
 
@@ -67,7 +74,7 @@ func migrate() error {
 		&models.Team{},
 		&models.Player{},
 		&models.Match{},
-		&models.MatchEvent{},
+		// &models.MatchEvent{},
 		&models.SiteConfig{},
 	)
 }
@@ -76,47 +83,39 @@ func migrate() error {
 func seed() error {
 	// Seed default site config
 	var configCount int64
-	DB.Model(&models.SiteConfig{}).Count(&configCount)
-	if configCount == 0 {
-		defaultConfig := models.SiteConfig{
-			Title:             "Zone 01 Oujda",
-			Subtitle:          "RFL 2026",
-			HeroSubtitle:      "Zone 01 Oujda • School Tournament 2026",
-			HeroTitle1:        "RAMADAN",
-			HeroTitle2:        "FOOTBALL",
-			HeroTitle3:        "LEAGUE",
-			AutoUpdateMatches: true,
-			MatchStage:        "League Match",
-			Fajr:              "05:42",
-			Sunrise:           "07:02",
-			Dhuhr:             "13:15",
-			Asr:               "16:42",
-			Maghrib:           "19:08",
-			Isha:              "20:28",
-			WeatherTemp:       18,
-			WeatherCondition:  "Clear",
-			WeatherWind:       12,
-			WeatherHumidity:   62,
+	if DB.Migrator().HasTable(&models.SiteConfig{}) {
+		DB.Model(&models.SiteConfig{}).Count(&configCount)
+		if configCount == 0 {
+			defaultConfig := models.SiteConfig{
+				Title:             "UMPO",
+				Subtitle:          "RFL 2026",
+				HeroSubtitle:      "UMPO • School Tournament 2026",
+				HeroTitle1:        "RAMADAN",
+				HeroTitle2:        "FOOTBALL",
+				HeroTitle3:        "LEAGUE",
+				AutoUpdateMatches: true,
+				MatchStage:        "League Match",
+				Fajr:              "05:42",
+				Sunrise:           "07:02",
+				Dhuhr:             "13:15",
+				Asr:               "16:42",
+				Maghrib:           "19:08",
+				Isha:              "20:28",
+				WeatherTemp:       18,
+				WeatherCondition:  "Clear",
+				WeatherWind:       12,
+				WeatherHumidity:   62,
+			}
+			if err := DB.Create(&defaultConfig).Error; err != nil {
+				return err
+			}
+			log.Println("✅ Default site config created")
 		}
-		if err := DB.Create(&defaultConfig).Error; err != nil {
-			return err
-		}
-		log.Println("Default site config created")
 	}
-
 	return nil
 }
 
 // GetDB returns the database instance
 func GetDB() *gorm.DB {
 	return DB
-}
-
-// Close closes the database connection
-func Close() error {
-	sqlDB, err := DB.DB()
-	if err != nil {
-		return err
-	}
-	return sqlDB.Close()
 }

@@ -179,7 +179,7 @@ export default function Hero() {
                 }`}
             >
               <Star className="w-4 h-4 text-[#D4A018]" fill="currentColor" />
-              <span className="text-sm font-ui text-[#D4A018]">Zone 01 Oujda 202</span>
+              <span className="text-sm font-ui text-[#D4A018]">UMPO 202</span>
               <Star className="w-4 h-4 text-[#D4A018]" fill="currentColor" />
             </div>
           </div>

@@ -1,4 +1,4 @@
-// Zone 01 Oujda Ramadan Football League 2026 - Types
+// UMPO Ramadan Football League 2026 - Types
 
 export interface Team {
   id: string;

@@ -22,9 +22,9 @@ type SiteConfigContextType = {
 };
 
 const defaultConfig: SiteConfig = {
-    title: 'Zone 01 Oujda',
+    title: 'UMPO',
     subtitle: 'RFL 2026',
-    heroSubtitle: 'Zone 01 Oujda • School Tournament 2026',
+    heroSubtitle: 'UMPO • School Tournament 2026',
     heroTitle1: 'RAMADAN',
     heroTitle2: 'FOOTBALL',
     heroTitle3: 'LEAGUE',
