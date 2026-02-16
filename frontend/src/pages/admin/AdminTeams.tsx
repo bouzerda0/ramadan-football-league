@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { Plus, Save, Trash2, Edit, Users, Trophy, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Player {
@@ -76,10 +77,17 @@ export default function AdminTeams() {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch('/api/admin/teams');
+            const response = await fetch(`${API_URL}/api/admin/teams`);
             if (response.ok) {
-                const data = await response.json();
-                setTeams(data || []);
+                const result = await response.json();
+                // API returns { success: true, data: [...] }
+                const teamsData = result.data || result || [];
+                // Map 'players' from API to 'squad' used in frontend
+                const mapped = (Array.isArray(teamsData) ? teamsData : []).map((t: Record<string, unknown>) => ({
+                    ...t,
+                    squad: t.players || t.squad || [],
+                }));
+                setTeams(mapped as Team[]);
             }
         } catch (error) {
             console.error('Error fetching teams:', error);
@@ -110,7 +118,7 @@ export default function AdminTeams() {
         }
 
         try {
-            const response = await fetch('/api/admin/teams', {
+            const response = await fetch(`${API_URL}/api/admin/teams`, {
                 method: 'POST',
                 body: formData,
             });
@@ -132,7 +140,7 @@ export default function AdminTeams() {
         if (!selectedTeam) return;
 
         try {
-            const response = await fetch('/api/admin/teams', {
+            const response = await fetch(`${API_URL}/api/admin/teams`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedTeam),
@@ -153,7 +161,7 @@ export default function AdminTeams() {
     const handleDeleteTeam = async () => {
         if (!selectedTeam) return;
         try {
-            const response = await fetch(`/api/admin/teams?id=${selectedTeam.id}`, {
+            const response = await fetch(`${API_URL}/api/admin/teams?id=${selectedTeam.id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {

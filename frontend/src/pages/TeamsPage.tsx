@@ -2,6 +2,7 @@
 import Navigation from '@/components/Navigation';
 // import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/lib/api';
 import { Users, Trophy, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -29,11 +30,19 @@ export default function TeamsPage() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await fetch("/api/teams");
+                const response = await fetch(`${API_URL}/api/teams`);
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log("Fetched teams:", data); // Debugging
-                    setTeams(data);
+                    const result = await response.json();
+                    console.log("Fetched teams:", result); // Debugging
+                    // API returns { success: true, data: [...] }
+                    const teamsData = result.data || result || [];
+                    // Map API field names to frontend field names
+                    const mapped = (Array.isArray(teamsData) ? teamsData : []).map((t: Record<string, unknown>) => ({
+                        ...t,
+                        teamName: t.name || t.teamName || '',
+                        captainName: t.captain || t.captainName || '',
+                    }));
+                    setTeams(mapped as Team[]);
                 } else {
                     setError("Failed to load teams");
                 }

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { Plus, Save, Trash2, Edit, Calendar, X, Trophy, Clock, MapPin } from 'lucide-react';
 
 interface MatchEvent {
@@ -99,17 +100,19 @@ export default function AdminMatches() {
     const fetchData = async () => {
         try {
             const [matchesRes, teamsRes] = await Promise.all([
-                fetch('/api/admin/matches'),
-                fetch('/api/admin/teams'),
+                fetch(`${API_URL}/api/admin/matches`),
+                fetch(`${API_URL}/api/admin/teams`),
             ]);
 
             if (matchesRes.ok) {
-                const data = await matchesRes.json();
-                setMatches(data.map((m: Match) => ({ ...m, events: m.events || [] })) || []);
+                const result = await matchesRes.json();
+                const matchesData = result.data || result || [];
+                setMatches((Array.isArray(matchesData) ? matchesData : []).map((m: Match) => ({ ...m, events: m.events || [] })));
             }
             if (teamsRes.ok) {
-                const data = await teamsRes.json();
-                setTeams(data || []);
+                const result = await teamsRes.json();
+                const teamsData = result.data || result || [];
+                setTeams(Array.isArray(teamsData) ? teamsData : []);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -120,8 +123,14 @@ export default function AdminMatches() {
 
     const handleCreateMatch = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (newMatch.homeTeamId === newMatch.awayTeamId) {
+            alert('Home and Away teams cannot be the same');
+            return;
+        }
+
         try {
-            const response = await fetch('/api/admin/matches', {
+            const response = await fetch(`${API_URL}/api/admin/matches`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newMatch),
@@ -131,7 +140,8 @@ export default function AdminMatches() {
                 setShowCreateModal(false);
                 resetNewMatch();
             } else {
-                alert('Failed to create match');
+                const errorData = await response.json().catch(() => ({}));
+                alert(errorData.error || 'Failed to create match');
             }
         } catch (error) {
             console.error('Failed to create match:', error);
@@ -144,7 +154,7 @@ export default function AdminMatches() {
         if (!selectedMatch) return;
 
         try {
-            const response = await fetch('/api/admin/matches', {
+            const response = await fetch(`${API_URL}/api/admin/matches`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedMatch),
@@ -167,7 +177,7 @@ export default function AdminMatches() {
     const handleDeleteMatch = async () => {
         if (!selectedMatch) return;
         try {
-            const response = await fetch(`/api/admin/matches?id=${selectedMatch.id}`, {
+            const response = await fetch(`${API_URL}/api/admin/matches?id=${selectedMatch.id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { API_URL } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { usePrayerTimes } from '@/hooks/usePrayerTimes';
@@ -36,7 +37,7 @@ export default function Hero() {
     console.log('Hero: Mounting');
     const fetchTeams = async () => {
       try {
-        const res = await fetch('/api/teams');
+        const res = await fetch(`${API_URL}/api/teams`);
         console.log('Hero: Fetch Status', res.status);
         if (res.ok) {
           const json = await res.json();

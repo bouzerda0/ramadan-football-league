@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Trophy, Target, HandHelping, Shield, AlertTriangle } from 'lucide-react';
@@ -14,7 +15,7 @@ export default function PlayerStats() {
   const [teams, setTeams] = useState<Record<string, BackendTeam>>({});
 
   useEffect(() => {
-    fetch('/api/teams')
+    fetch(`${API_URL}/api/teams`)
       .then(res => res.json())
       .then((json) => {
         const data: BackendTeam[] = Array.isArray(json) ? json : (json.data || []);

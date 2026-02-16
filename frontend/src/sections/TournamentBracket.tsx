@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 import { Trophy } from 'lucide-react';
 
@@ -29,8 +30,8 @@ export default function TournamentBracket() {
         const fetchData = async () => {
             try {
                 const [matchesRes, teamsRes] = await Promise.all([
-                    fetch('/api/matches'),
-                    fetch('/api/teams')
+                    fetch(`${API_URL}/api/matches`),
+                    fetch(`${API_URL}/api/teams`)
                 ]);
 
                 if (matchesRes.ok && teamsRes.ok) {
