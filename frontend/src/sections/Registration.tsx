@@ -18,7 +18,7 @@ export default function Registration() {
   const contactInfo = [
     { icon: <Mail className="w-4 h-4" />, text: 'zone01.oujda@school.edu.ma' },
     { icon: <Phone className="w-4 h-4" />, text: '+212 536 00 00 00' },
-    { icon: <MapPin className="w-4 h-4" />, text: 'Zone 01, Oujda, Morocco' },
+    { icon: <MapPin className="w-4 h-4" />, text: 'UMPO, Oujda, Morocco' },
   ];
 
   return (
