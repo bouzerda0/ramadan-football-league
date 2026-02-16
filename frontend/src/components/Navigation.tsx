@@ -77,7 +77,7 @@ export default function Navigation() {
                   <Trophy className="w-4 h-4 md:w-5 md:h-5 text-[#0B0F1C]" />
                 )}
               </div>
-              <div className="hidden sm:block text-left">
+              <div className="text-left">
                 <span className="font-display font-bold text-[#F4F6FA] text-sm md:text-base block">
                   {config.title}
                 </span>

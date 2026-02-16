@@ -83,15 +83,6 @@ func migrate() error {
 func seed() error {
 	// Seed default site config
 	var configCount int64
-<<<<<<< HEAD
-	if DB.Migrator().HasTable(&models.SiteConfig{}) {
-		DB.Model(&models.SiteConfig{}).Count(&configCount)
-		if configCount == 0 {
-			defaultConfig := models.SiteConfig{
-				Title:             "UMPO League",
-				Subtitle:          "RFL 2026",
-				HeroSubtitle:      "UMPO •  High School Tournament 2026
-=======
 	DB.Model(&models.SiteConfig{}).Count(&configCount)
 	if configCount == 0 {
 		defaultConfig := models.SiteConfig{
@@ -119,31 +110,7 @@ func seed() error {
 		}
 		log.Println("Default site config created")
 	}
->>>>>>> c3fc652 (change)
 
-",
-				HeroTitle1:        "RAMADAN",
-				HeroTitle2:        "FOOTBALL",
-				HeroTitle3:        "LEAGUE",
-				AutoUpdateMatches: true,
-				MatchStage:        "League Match",
-				Fajr:              "05:42",
-				Sunrise:           "07:02",
-				Dhuhr:             "13:15",
-				Asr:               "16:42",
-				Maghrib:           "19:08",
-				Isha:              "20:28",
-				WeatherTemp:       18,
-				WeatherCondition:  "Clear",
-				WeatherWind:       12,
-				WeatherHumidity:   62,
-			}
-			if err := DB.Create(&defaultConfig).Error; err != nil {
-				return err
-			}
-			log.Println("✅ Default site config created")
-		}
-	}
 	return nil
 }
 

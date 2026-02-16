@@ -10,9 +10,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-
 	// هام جدا: هذا باش يخدم SQLite بلا CGO فـ Railway
-	_ "modernc.org/sqlite"
 )
 
 func main() {
@@ -81,6 +79,8 @@ func main() {
 	for _, candidate := range []string{
 		"./frontend/dist",
 		"../frontend/dist",
+		"../../frontend/dist",
+		"../../../frontend/dist",
 		"dist",               // زدنا هادي حيت مرات كيكون ديريكت
 		"/app/frontend/dist", // مسار Railway المطلق
 	} {

@@ -21,14 +21,7 @@ const translations = {
   'hero.ramadan': { ar: 'رمضان', fr: 'RAMADAN', en: 'RAMADAN' },
   'hero.football': { ar: 'كرة القدم', fr: 'FOOTBALL', en: 'FOOTBALL' },
   'hero.league': { ar: 'الدوري', fr: 'LEAGUE', en: 'LEAGUE' },
-<<<<<<< HEAD
-  'hero.subtitle': {
-    ar: 'زون 01 وجدة • بطولة المدرسة 2026', fr: 'UMPO • Tournoi Scolaire 2026', en: 'UMPO •  High School Tournament 2026
-
-' },
-=======
   'hero.subtitle': { ar: 'زون 01 وجدة • بطولة المدرسة 2026', fr: 'UMPO • Tournoi Scolaire 2026', en: 'UMPO • School Tournament 2026' },
->>>>>>> c3fc652 (change)
   'hero.cta': { ar: 'عرض الجدول', fr: 'Voir Calendrier', en: 'View Schedule' },
 'hero.meta': { ar: '6 فرق • دور المجموعات → خروج المغلوب • مباريات ما بعد الإفطار', fr: '6 équipes • Groupes → Élimination • Matchs post-Iftar', en: '6 teams • Group stage → Knockout • Post-Iftar matches' },
 'hero.nextMatch': { ar: 'المباراة القادمة', fr: 'Prochain Match', en: 'Next Match' },
@@ -76,15 +69,9 @@ const translations = {
 'spirit.subtitle': { ar: 'لعب نظيف • احترام • عمل جماعي', fr: 'Fair-play • Respect • Esprit d\'équipe', en: 'Fair play • Respect • Teamwork' },
 'spirit.score': { ar: 'الن score', fr: 'Score', en: 'Score' },
 
-<<<<<<< HEAD
-// Gallery
-'gallery.title': { ar: 'اللحظات', fr: 'MOMENTS', en: 'MOMENTS' },
-'gallery.subtitle': { ar: 'أبرز ما بعد المباراة من زون 01 وجدة', fr: 'Moments post-match de UMPO', en: 'Post-match highlights from UMPO' },
-=======
   // Gallery
   'gallery.title': { ar: 'اللحظات', fr: 'MOMENTS', en: 'MOMENTS' },
   'gallery.subtitle': { ar: 'أبرز ما بعد المباراة من زون 01 وجدة', fr: 'Moments post-match de UMPO', en: 'Post-match highlights from UMPO' },
->>>>>>> c3fc652 (change)
 
 // Prayer Times
 'prayer.title': { ar: 'أوقات الصلاة', fr: 'HORAIRES PRIÈRE', en: 'PRAYER TIMES' },
@@ -108,15 +95,9 @@ const translations = {
 'register.cta': { ar: 'بدء التسجيل', fr: 'Commencer Inscription', en: 'Start Registration' },
 'register.download': { ar: 'تحميل القوانين (PDF)', fr: 'Télécharger Règles (PDF)', en: 'Download Rules (PDF)' },
 
-<<<<<<< HEAD
-// Footer
-'footer.contact': { ar: 'تواصل معنا', fr: 'Contact', en: 'Contact' },
-'footer.rights': { ar: '© 2026 زون 01 وجدة. جميع الحقوق محفوظة.', fr: '© 2026 UMPO. Tous droits réservés.', en: '© 2026 UMPO. All rights reserved.' },
-=======
   // Footer
   'footer.contact': { ar: 'تواصل معنا', fr: 'Contact', en: 'Contact' },
   'footer.rights': { ar: '© 2026 زون 01 وجدة. جميع الحقوق محفوظة.', fr: '© 2026 UMPO. Tous droits réservés.', en: '© 2026 UMPO. All rights reserved.' },
->>>>>>> c3fc652 (change)
 
 // Admin
 'admin.title': { ar: 'لوحة التحكم', fr: 'Panneau Admin', en: 'Admin Panel' },
