@@ -78,8 +78,15 @@ export default function AdminTeams() {
         try {
             const response = await fetch('/api/admin/teams');
             if (response.ok) {
-                const data = await response.json();
-                setTeams(data || []);
+                const result = await response.json();
+                // API returns { success: true, data: [...] }
+                const teamsData = result.data || result || [];
+                // Map 'players' from API to 'squad' used in frontend
+                const mapped = (Array.isArray(teamsData) ? teamsData : []).map((t: Record<string, unknown>) => ({
+                    ...t,
+                    squad: t.players || t.squad || [],
+                }));
+                setTeams(mapped as Team[]);
             }
         } catch (error) {
             console.error('Error fetching teams:', error);

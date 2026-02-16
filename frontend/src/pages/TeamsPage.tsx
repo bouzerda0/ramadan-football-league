@@ -31,9 +31,17 @@ export default function TeamsPage() {
             try {
                 const response = await fetch("/api/teams");
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log("Fetched teams:", data); // Debugging
-                    setTeams(data);
+                    const result = await response.json();
+                    console.log("Fetched teams:", result); // Debugging
+                    // API returns { success: true, data: [...] }
+                    const teamsData = result.data || result || [];
+                    // Map API field names to frontend field names
+                    const mapped = (Array.isArray(teamsData) ? teamsData : []).map((t: Record<string, unknown>) => ({
+                        ...t,
+                        teamName: t.name || t.teamName || '',
+                        captainName: t.captain || t.captainName || '',
+                    }));
+                    setTeams(mapped as Team[]);
                 } else {
                     setError("Failed to load teams");
                 }

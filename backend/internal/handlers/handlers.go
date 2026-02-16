@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"ramadan-league/internal/database"
@@ -218,6 +222,108 @@ func GetTopScorers(c *gin.Context) {
 		return
 	}
 	success(c, scorers)
+}
+
+// RegisterTeam handles public team registration
+func RegisterTeam(c *gin.Context) {
+	db := database.GetDB()
+
+	// Parse multipart form
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
+		errorResponse(c, http.StatusBadRequest, "Failed to parse form data")
+		return
+	}
+
+	// Extract form fields
+	teamName := c.PostForm("teamName")
+	captainName := c.PostForm("captainName")
+	captainEmail := c.PostForm("captainEmail")
+	captainPhone := c.PostForm("captainPhone")
+	playersJSON := c.PostForm("players")
+
+	// Validate required fields
+	if teamName == "" || captainName == "" || captainEmail == "" || captainPhone == "" {
+		errorResponse(c, http.StatusBadRequest, "Missing required fields")
+		return
+	}
+
+	// Parse players JSON
+	type PlayerData struct {
+		Name string `json:"name"`
+	}
+	var playersData []PlayerData
+	if playersJSON != "" {
+		// Parse players JSON string
+		if err := json.Unmarshal([]byte(playersJSON), &playersData); err != nil {
+			errorResponse(c, http.StatusBadRequest, "Invalid players data")
+			return
+		}
+	}
+
+	// Handle logo upload (optional)
+	logoPath := ""
+	file, header, err := c.Request.FormFile("logo")
+	if err == nil {
+		defer file.Close()
+
+		// Save file to uploads directory
+		uploadDir := "./uploads/logos"
+		if err := os.MkdirAll(uploadDir, 0755); err != nil {
+			errorResponse(c, http.StatusInternalServerError, "Failed to create upload directory")
+			return
+		}
+
+		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), header.Filename)
+		filepath := filepath.Join(uploadDir, filename)
+
+		out, err := os.Create(filepath)
+		if err != nil {
+			errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
+			return
+		}
+		defer out.Close()
+
+		if _, err := io.Copy(out, file); err != nil {
+			errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
+			return
+		}
+
+		logoPath = "/uploads/logos/" + filename
+	}
+
+	// Create team
+	team := models.Team{
+		Name:         teamName,
+		ShortName:    utils.GenerateShortName(teamName),
+		Captain:      captainName,
+		CaptainEmail: captainEmail,
+		CaptainPhone: captainPhone,
+		LogoPath:     logoPath,
+	}
+
+	if err := db.Create(&team).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to create team")
+		return
+	}
+
+	// Create players
+	for i, pd := range playersData {
+		if pd.Name == "" {
+			continue // Skip empty player names
+		}
+		player := models.Player{
+			TeamID:   team.ID,
+			Name:     pd.Name,
+			Number:   i + 1,
+			Position: models.PositionMID, // Default position
+		}
+		db.Create(&player)
+	}
+
+	// Reload team with players
+	db.Preload("Players").First(&team, "id = ?", team.ID)
+
+	success(c, team)
 }
 
 // ============ Admin Handlers ============

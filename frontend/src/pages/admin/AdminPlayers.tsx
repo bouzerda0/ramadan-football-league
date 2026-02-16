@@ -38,7 +38,8 @@ export default function AdminPlayers() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [positionFilter, setPositionFilter] = useState<string>('all');
-    const [teamFilter, setTeamFilter] = useState<string>('all');
+    // const [teamFilter, setTeamFilter] = useState<string>('all'); // Removed in favor of selection
+    const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null); // New state for selected team
     const [sortBy, setSortBy] = useState<'goals' | 'assists' | 'matches' | 'cards'>('goals');
     const [editingPlayer, setEditingPlayer] = useState<{ teamId: string; playerId: string } | null>(null);
     const [editValues, setEditValues] = useState<Partial<Player>>({});
@@ -51,8 +52,15 @@ export default function AdminPlayers() {
         try {
             const response = await fetch('/api/admin/teams');
             if (response.ok) {
-                const data = await response.json();
-                setTeams(data || []);
+                const result = await response.json();
+                // API returns { success: true, data: [...] }
+                const teamsData = result.data || result || [];
+                // Map 'players' from API to 'squad' used in frontend
+                const mapped = (Array.isArray(teamsData) ? teamsData : []).map((t: Record<string, unknown>) => ({
+                    ...t,
+                    squad: t.players || t.squad || [],
+                }));
+                setTeams(mapped as Team[]);
             }
         } catch (error) {
             console.error('Error fetching teams:', error);
@@ -112,6 +120,11 @@ export default function AdminPlayers() {
     const getFilteredAndSortedPlayers = () => {
         let players = getAllPlayers();
 
+        // Filter by selected team if one is selected
+        if (selectedTeamId) {
+            players = players.filter(p => p.teamId === selectedTeamId);
+        }
+
         // Search filter
         if (searchTerm) {
             players = players.filter(p =>
@@ -123,11 +136,6 @@ export default function AdminPlayers() {
         // Position filter
         if (positionFilter !== 'all') {
             players = players.filter(p => p.position === positionFilter);
-        }
-
-        // Team filter
-        if (teamFilter !== 'all') {
-            players = players.filter(p => p.teamId === teamFilter);
         }
 
         // Sort
@@ -173,90 +181,83 @@ export default function AdminPlayers() {
         );
     }
 
+    // New: Team Selection View
+    if (!selectedTeamId) {
+        return (
+            <div className="space-y-6 pb-20">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                        <User className="w-6 h-6 text-[#D4A018]" />
+                        Players Management
+                    </h2>
+                </div>
+
+                {/* Team Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {teams.map((team) => (
+                        <div
+                            key={team.id}
+                            onClick={() => setSelectedTeamId(team.id)}
+                            className="bg-[#141B2D] border border-[#D4A018]/10 rounded-xl p-6 cursor-pointer hover:border-[#D4A018]/40 hover:bg-[#1a2340] transition-all group"
+                        >
+                            <div className="flex items-center gap-4 mb-4">
+                                {team.logoPath ? (
+                                    <img src={team.logoPath} alt={team.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#D4A018]/20 group-hover:border-[#D4A018] transition-colors" />
+                                ) : (
+                                    <div className="w-16 h-16 rounded-full bg-[#D4A018]/10 flex items-center justify-center border-2 border-[#D4A018]/20 group-hover:border-[#D4A018] transition-colors">
+                                        <Shield className="w-8 h-8 text-[#D4A018]" />
+                                    </div>
+                                )}
+                                <div>
+                                    <h3 className="font-bold text-xl group-hover:text-[#D4A018] transition-colors">{team.name}</h3>
+                                    <p className="text-[#A9B3C7] text-sm">{team.shortName}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm bg-[#0B0F1C]/50 p-3 rounded-lg">
+                                <span className="text-[#A9B3C7]">Squad Size</span>
+                                <span className="font-bold text-[#F4F6FA]">{team.squad?.length || 0} Players</span>
+                            </div>
+                        </div>
+                    ))}
+
+                    {teams.length === 0 && (
+                        <div className="col-span-full text-center py-12 bg-[#141B2D]/50 rounded-xl border border-dashed border-[#D4A018]/20">
+                            <p className="text-[#A9B3C7]">No teams found. Please register teams first.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Detail View: Selected Team Players
+    const selectedTeam = teams.find(t => t.id === selectedTeamId);
     const filteredPlayers = getFilteredAndSortedPlayers();
 
     return (
         <div className="space-y-6 pb-20">
-            {/* Header */}
+            {/* Header with Back Button */}
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <User className="w-6 h-6 text-[#D4A018]" />
-                    Players Management
-                </h2>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid md:grid-cols-3 gap-4">
-                {/* Top Scorers */}
-                <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
-                    <h3 className="font-bold text-[#D4A018] mb-3 flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" /> Top Scorers
-                    </h3>
-                    <div className="space-y-2">
-                        {getTopScorers().length === 0 ? (
-                            <p className="text-[#A9B3C7] text-sm">No goals yet</p>
-                        ) : (
-                            getTopScorers().map((player, idx) => (
-                                <div key={player.id} className="flex items-center justify-between text-sm">
-                                    <span className="flex items-center gap-2">
-                                        <span className="text-[#D4A018] font-bold">{idx + 1}.</span>
-                                        {player.name}
-                                    </span>
-                                    <span className="font-bold text-[#D4A018]">{player.goals}</span>
-                                </div>
-                            ))
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setSelectedTeamId(null)}
+                        className="bg-[#141B2D] hover:bg-[#1a2340] border border-[#D4A018]/20 text-[#A9B3C7] hover:text-[#F4F6FA] px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                        &larr; Back to Teams
+                    </button>
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                        {selectedTeam?.logoPath && (
+                            <img src={selectedTeam.logoPath} alt={selectedTeam.name} className="w-8 h-8 rounded-full object-cover" />
                         )}
-                    </div>
-                </div>
-
-                {/* Top Assists */}
-                <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
-                    <h3 className="font-bold text-[#D4A018] mb-3 flex items-center gap-2">
-                        <User className="w-5 h-5" /> Top Assists
-                    </h3>
-                    <div className="space-y-2">
-                        {getTopAssisters().length === 0 ? (
-                            <p className="text-[#A9B3C7] text-sm">No assists yet</p>
-                        ) : (
-                            getTopAssisters().map((player, idx) => (
-                                <div key={player.id} className="flex items-center justify-between text-sm">
-                                    <span className="flex items-center gap-2">
-                                        <span className="text-[#D4A018] font-bold">{idx + 1}.</span>
-                                        {player.name}
-                                    </span>
-                                    <span className="font-bold text-[#D4A018]">{player.assists}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                {/* Clean Sheets */}
-                <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
-                    <h3 className="font-bold text-[#D4A018] mb-3 flex items-center gap-2">
-                        <Shield className="w-5 h-5" /> Clean Sheets
-                    </h3>
-                    <div className="space-y-2">
-                        {getCleanSheets().length === 0 ? (
-                            <p className="text-[#A9B3C7] text-sm">No clean sheets yet</p>
-                        ) : (
-                            getCleanSheets().map((player, idx) => (
-                                <div key={player.id} className="flex items-center justify-between text-sm">
-                                    <span className="flex items-center gap-2">
-                                        <span className="text-[#D4A018] font-bold">{idx + 1}.</span>
-                                        {player.name}
-                                    </span>
-                                    <span className="font-bold text-[#D4A018]">{player.cleanSheets}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                        <span className="text-[#D4A018]">{selectedTeam?.name}</span> Players
+                    </h2>
                 </div>
             </div>
 
-            {/* Filters */}
+            {/* Existing Filters (modified to remove team filter) */}
             <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
-                <div className="grid md:grid-cols-5 gap-4">
+                <div className="grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-2">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9B3C7]" />
@@ -268,16 +269,6 @@ export default function AdminPlayers() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                    </div>
-                    <div>
-                        <select
-                            className="w-full bg-[#0B0F1C] p-3 rounded border border-[#D4A018]/20 text-[#F4F6FA]"
-                            value={teamFilter}
-                            onChange={(e) => setTeamFilter(e.target.value)}
-                        >
-                            <option value="all">All Teams</option>
-                            {teams.map((t: Team) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                        </select>
                     </div>
                     <div>
                         <select
@@ -309,7 +300,6 @@ export default function AdminPlayers() {
                 <div className="text-center py-16 bg-[#141B2D] rounded-xl border border-[#D4A018]/10">
                     <User className="w-16 h-16 text-[#D4A018]/30 mx-auto mb-4" />
                     <p className="text-[#A9B3C7] text-lg">No players found.</p>
-                    <p className="text-[#6B7280] text-sm mt-2">Add teams with players to see them here.</p>
                 </div>
             ) : (
                 <div className="bg-[#141B2D] rounded-xl border border-[#D4A018]/10 overflow-hidden">
@@ -318,7 +308,6 @@ export default function AdminPlayers() {
                             <thead className="bg-[#0B0F1C]">
                                 <tr>
                                     <th className="text-left p-4 text-[#A9B3C7] font-semibold">Player</th>
-                                    <th className="text-left p-4 text-[#A9B3C7] font-semibold">Team</th>
                                     <th className="text-center p-4 text-[#A9B3C7] font-semibold">#</th>
                                     <th className="text-center p-4 text-[#A9B3C7] font-semibold">Pos</th>
                                     <th className="text-center p-4 text-[#A9B3C7] font-semibold">MP</th>
@@ -341,7 +330,6 @@ export default function AdminPlayers() {
                                                 {player.isSubstitute && <span className="text-[#A9B3C7] text-xs">(Sub)</span>}
                                             </div>
                                         </td>
-                                        <td className="p-4 text-[#A9B3C7]">{player.teamName}</td>
                                         <td className="p-4 text-center">{player.number}</td>
                                         <td className="p-4 text-center">
                                             <span className="px-2 py-1 rounded bg-[#D4A018]/10 text-[#D4A018] text-xs">
@@ -459,37 +447,74 @@ export default function AdminPlayers() {
                 </div>
             )}
 
-            {/* Summary Stats */}
-            {filteredPlayers.length > 0 && (
+            {/* Stats Cards (Now only showing for selected team) */}
+            <div className="grid md:grid-cols-3 gap-4 mt-8">
+                {/* Top Scorers */}
                 <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div>
-                            <p className="text-[#A9B3C7] text-sm">Total Players</p>
-                            <p className="text-2xl font-bold text-[#D4A018]">{filteredPlayers.length}</p>
-                        </div>
-                        <div>
-                            <p className="text-[#A9B3C7] text-sm">Total Goals</p>
-                            <p className="text-2xl font-bold text-green-400">
-                                {filteredPlayers.reduce((sum, p) => sum + p.goals, 0)}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-[#A9B3C7] text-sm">Total Assists</p>
-                            <p className="text-2xl font-bold text-blue-400">
-                                {filteredPlayers.reduce((sum, p) => sum + p.assists, 0)}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-[#A9B3C7] text-sm">Yellow/Red Cards</p>
-                            <p className="text-2xl font-bold">
-                                <span className="text-yellow-400">{filteredPlayers.reduce((sum, p) => sum + p.yellowCards, 0)}</span>
-                                <span className="text-[#6B7280]">/</span>
-                                <span className="text-red-400">{filteredPlayers.reduce((sum, p) => sum + p.redCards, 0)}</span>
-                            </p>
-                        </div>
+                    <h3 className="font-bold text-[#D4A018] mb-3 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5" /> Top Scorers
+                    </h3>
+                    <div className="space-y-2">
+                        {getTopScorers().length === 0 ? (
+                            <p className="text-[#A9B3C7] text-sm">No goals yet</p>
+                        ) : (
+                            getTopScorers().map((player, idx) => (
+                                <div key={player.id} className="flex items-center justify-between text-sm">
+                                    <span className="flex items-center gap-2">
+                                        <span className="text-[#D4A018] font-bold">{idx + 1}.</span>
+                                        {player.name}
+                                    </span>
+                                    <span className="font-bold text-[#D4A018]">{player.goals}</span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
-            )}
+
+                {/* Top Assists */}
+                <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
+                    <h3 className="font-bold text-[#D4A018] mb-3 flex items-center gap-2">
+                        <User className="w-5 h-5" /> Top Assists
+                    </h3>
+                    <div className="space-y-2">
+                        {getTopAssisters().length === 0 ? (
+                            <p className="text-[#A9B3C7] text-sm">No assists yet</p>
+                        ) : (
+                            getTopAssisters().map((player, idx) => (
+                                <div key={player.id} className="flex items-center justify-between text-sm">
+                                    <span className="flex items-center gap-2">
+                                        <span className="text-[#D4A018] font-bold">{idx + 1}.</span>
+                                        {player.name}
+                                    </span>
+                                    <span className="font-bold text-[#D4A018]">{player.assists}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Clean Sheets */}
+                <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">
+                    <h3 className="font-bold text-[#D4A018] mb-3 flex items-center gap-2">
+                        <Shield className="w-5 h-5" /> Clean Sheets
+                    </h3>
+                    <div className="space-y-2">
+                        {getCleanSheets().length === 0 ? (
+                            <p className="text-[#A9B3C7] text-sm">No clean sheets yet</p>
+                        ) : (
+                            getCleanSheets().map((player, idx) => (
+                                <div key={player.id} className="flex items-center justify-between text-sm">
+                                    <span className="flex items-center gap-2">
+                                        <span className="text-[#D4A018] font-bold">{idx + 1}.</span>
+                                        {player.name}
+                                    </span>
+                                    <span className="font-bold text-[#D4A018]">{player.cleanSheets}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

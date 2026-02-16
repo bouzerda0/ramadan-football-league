@@ -104,12 +104,14 @@ export default function AdminMatches() {
             ]);
 
             if (matchesRes.ok) {
-                const data = await matchesRes.json();
-                setMatches(data.map((m: Match) => ({ ...m, events: m.events || [] })) || []);
+                const result = await matchesRes.json();
+                const matchesData = result.data || result || [];
+                setMatches((Array.isArray(matchesData) ? matchesData : []).map((m: Match) => ({ ...m, events: m.events || [] })));
             }
             if (teamsRes.ok) {
-                const data = await teamsRes.json();
-                setTeams(data || []);
+                const result = await teamsRes.json();
+                const teamsData = result.data || result || [];
+                setTeams(Array.isArray(teamsData) ? teamsData : []);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -120,6 +122,12 @@ export default function AdminMatches() {
 
     const handleCreateMatch = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (newMatch.homeTeamId === newMatch.awayTeamId) {
+            alert('Home and Away teams cannot be the same');
+            return;
+        }
+
         try {
             const response = await fetch('/api/admin/matches', {
                 method: 'POST',
@@ -131,7 +139,8 @@ export default function AdminMatches() {
                 setShowCreateModal(false);
                 resetNewMatch();
             } else {
-                alert('Failed to create match');
+                const errorData = await response.json().catch(() => ({}));
+                alert(errorData.error || 'Failed to create match');
             }
         } catch (error) {
             console.error('Failed to create match:', error);
