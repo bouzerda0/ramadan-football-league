@@ -24,7 +24,9 @@ type SiteConfigContextType = {
 const defaultConfig: SiteConfig = {
     title: 'UMPO',
     subtitle: 'RFL 2026',
-    heroSubtitle: 'UMPO • School Tournament 2026',
+    heroSubtitle: 'UMPO •  High School Tournament 2026
+
+',
     heroTitle1: 'RAMADAN',
     heroTitle2: 'FOOTBALL',
     heroTitle3: 'LEAGUE',
