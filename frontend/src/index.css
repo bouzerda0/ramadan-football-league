@@ -142,7 +142,7 @@
   .btn-primary {
     @apply bg-[#FACC15] text-[#040710] font-bold px-6 py-3 rounded-xl;
     @apply hover:bg-[#FDE047] transition-all duration-300;
-    @apply hover:scale-[1.02] hover:shadow-[0_0_20px_-5px_rgba(250, 204, 21, 0.5)];
+    @apply hover:shadow-[0_0_20px_-5px_rgba(250,204,21,0.5)];
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
