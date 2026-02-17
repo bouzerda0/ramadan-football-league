@@ -75,7 +75,7 @@ func migrate() error {
 		&models.Team{},
 		&models.Player{},
 		&models.Match{},
-		// &models.MatchEvent{},
+		&models.MatchEvent{},
 		&models.SiteConfig{},
 	)
 }

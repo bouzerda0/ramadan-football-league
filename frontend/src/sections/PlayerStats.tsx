@@ -145,7 +145,7 @@ export default function PlayerStats() {
                   <div className="text-center md:text-left">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A018]/20 text-[#D4A018] text-sm font-ui font-semibold mb-4 border border-[#D4A018]/20">
                       <Trophy className="w-4 h-4" />
-                      #1 {getStatLabel()}
+                      #1
                     </div>
                     <div className="text-7xl md:text-8xl font-display font-black text-gold-gradient leading-none">
                       {getStatValue(topPlayers[0]).toString().padStart(2, '0')}
@@ -162,7 +162,7 @@ export default function PlayerStats() {
                     <h3 className="text-2xl font-display font-bold text-[#F4F6FA]">
                       {topPlayers[0].name}
                     </h3>
-                    <p className="text-[#A9B3C7] mt-1">{teams[topPlayers[0].teamId]?.teamName}</p>
+                    <p className="text-[#A9B3C7] mt-1">{teams[topPlayers[0].teamId]?.name}</p>
                     <p className="text-xs text-[#6B7280] mt-1">#{topPlayers[0].number} • {topPlayers[0].position}</p>
                   </div>
 
@@ -211,7 +211,7 @@ export default function PlayerStats() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-[#F4F6FA] truncate">{player.name}</p>
                   <p className="text-xs text-[#6B7280]">
-                    {teams[player.teamId]?.teamName}
+                    {teams[player.teamId]?.name}
                     {player.number ? ` • #${player.number}` : ''}
                   </p>
                 </div>
@@ -237,6 +237,6 @@ export default function PlayerStats() {
           </div>
         </div>
       </div>
-    </section>
+    </section >
   );
 }

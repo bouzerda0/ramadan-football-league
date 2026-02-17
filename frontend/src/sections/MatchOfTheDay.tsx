@@ -77,25 +77,37 @@ export default function MatchOfTheDay() {
           }
 
           if (selectedMatch) {
-            const homeTeam = teams.find((t) => t.id === selectedMatch!.homeTeamId);
-            const awayTeam = teams.find((t) => t.id === selectedMatch!.awayTeamId);
+            // Enhanced debugging and resolving logic
+            const preloadedHome = (selectedMatch as any).homeTeam;
+            const preloadedAway = (selectedMatch as any).awayTeam;
+            const listHome = teams.find((t) => String(t.id) === String(selectedMatch!.homeTeamId));
+            const listAway = teams.find((t) => String(t.id) === String(selectedMatch!.awayTeamId));
+            const homeTeam = (preloadedHome && preloadedHome.name) ? preloadedHome : listHome;
+            const awayTeam = (preloadedAway && preloadedAway.name) ? preloadedAway : listAway;
 
-            if (homeTeam && awayTeam) {
+            if (homeTeam || awayTeam) {
+              const getSafeName = (team: any) => {
+                if (!team) return 'Unknown Team';
+                if (team.name) return team.name;
+                if (team.teamName) return team.teamName;
+                return 'Unknown Team';
+              };
+
               setMatch({
                 ...selectedMatch,
                 home: {
-                  teamName: homeTeam.teamName || 'Unknown Team',
-                  logoPath: homeTeam.logoPath || '',
-                  colors: { primary: '#D4A018', secondary: '#F4F6FA' }, // Default gold
-                  shortName: homeTeam.teamName ? homeTeam.teamName.substring(0, 3).toUpperCase() : 'HOM',
-                  cohort: 'Cohort ' + String.fromCharCode(65 + teams.indexOf(homeTeam)),
+                  teamName: getSafeName(homeTeam),
+                  logoPath: homeTeam?.logoPath || '',
+                  colors: { primary: homeTeam?.primaryColor || '#D4AF37', secondary: homeTeam?.secondaryColor || '#F8FAFC' },
+                  shortName: homeTeam?.shortName || (homeTeam?.name || 'HOM').substring(0, 3).toUpperCase(),
+                  cohort: homeTeam?.cohort || 'Cohort A',
                 },
                 away: {
-                  teamName: awayTeam.teamName || 'Unknown Team',
-                  logoPath: awayTeam.logoPath || '',
-                  colors: { primary: '#3B82F6', secondary: '#ffffff' },
-                  shortName: awayTeam.teamName ? awayTeam.teamName.substring(0, 3).toUpperCase() : 'AWY',
-                  cohort: 'Cohort 2'
+                  teamName: getSafeName(awayTeam),
+                  logoPath: awayTeam?.logoPath || '',
+                  colors: { primary: awayTeam?.primaryColor || '#10B981', secondary: awayTeam?.secondaryColor || '#ffffff' },
+                  shortName: awayTeam?.shortName || (awayTeam?.name || 'AWY').substring(0, 3).toUpperCase(),
+                  cohort: awayTeam?.cohort || 'Cohort B'
                 },
                 stage: config.matchStage || 'League Match'
               });
@@ -115,15 +127,15 @@ export default function MatchOfTheDay() {
 
   }, [config.autoUpdateMatches, config.featuredMatchId, config.matchStage]);
 
-  if (loading) return <div className="min-h-screen bg-[#0B0F1C] flex items-center justify-center text-[#D4A018]">{t('status.loading')} Match...</div>;
+  if (loading) return <div className="min-h-screen bg-[var(--rl-navy)] flex items-center justify-center text-[var(--rl-gold)] font-display text-xl animate-pulse">{t('status.loading')} Match...</div>;
 
   if (!match) {
     return (
-      <section className="py-16 text-center">
-        <div className="max-w-md mx-auto px-6 py-10 rounded-2xl bg-[#141B2D]/60 border border-[#D4A018]/20">
-          <span className="text-4xl mb-4 block">⚽</span>
-          <h2 className="text-xl font-display font-bold text-[#F4F6FA] mb-2">No Match Scheduled Today</h2>
-          <p className="text-sm text-[#A9B3C7]">Check back later for upcoming matches</p>
+      <section className="py-24 text-center bg-[var(--rl-navy)]">
+        <div className="max-w-md mx-auto px-8 py-12 rounded-3xl glass border border-[var(--rl-gold)]/20 shadow-[0_0_40px_-10px_rgba(0,0,0,0.5)]">
+          <Trophy className="w-16 h-16 mx-auto mb-6 text-[var(--rl-gold)] opacity-50" />
+          <h2 className="text-2xl font-display font-bold text-white mb-2">No Match Scheduled Today</h2>
+          <p className="text-[var(--rl-gray)]">Returns soon. Check the schedule for details.</p>
         </div>
       </section>
     );
@@ -133,128 +145,102 @@ export default function MatchOfTheDay() {
     <section
       ref={ref}
       id="match-of-day"
-      className="relative min-h-screen w-full overflow-hidden bg-[#040710]"
+      className="relative min-h-screen w-full overflow-hidden bg-[var(--rl-navy)]"
       dir={dir}
     >
-      {/* ... existing render logic ... */}
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0D1321] via-[#040710] to-[#000000]" />
+      {/* Background with Noise & Gradient */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[var(--rl-navy-light)] via-[var(--rl-navy)] to-black" />
         <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-        <div className="absolute -bottom-1/2 left-0 right-0 h-1/2 bg-gradient-to-t from-[#FACC15]/5 to-transparent blur-3xl" />
+        <div className="absolute -bottom-1/2 left-0 right-0 h-1/2 bg-gradient-to-t from-[var(--rl-gold)]/5 to-transparent blur-3xl" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen section-padding py-20">
-        <div className="w-full max-w-6xl mx-auto">
+      <div className="relative z-10 flex items-center justify-center min-h-screen section-padding py-24">
+        <div className="w-full max-w-7xl mx-auto">
+
           {/* Section Header */}
-          <div
-            className="text-center mb-12"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D4A018]/10 border border-[#D4A018]/30 mb-4">
-              <Trophy className="w-4 h-4 text-[#D4A018]" />
-              <span className="text-sm font-ui text-[#D4A018]">{match.stage}</span>
+          <div className="text-center mb-16 scroll-reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--rl-gold)]/10 border border-[var(--rl-gold)]/30 mb-6 backdrop-blur-md">
+              <Trophy className="w-4 h-4 text-[var(--rl-gold)]" />
+              <span className="text-sm font-ui font-bold text-[var(--rl-gold)] tracking-wider">MATCH OF THE DAY • {match.stage}</span>
             </div>
-            <h2 className="text-section font-display font-black text-[#F4F6FA]">
+            <h2 className="text-section font-display font-black text-white leading-tight">
               {t('mod.title')}
             </h2>
           </div>
 
-          {/* Match Card */}
+          {/* Match Card - Glass & Gold */}
           <div className="relative z-20 perspective-1000">
-            <div className="card-gold rounded-3xl p-8 md:p-14 overflow-hidden transform transition-transform duration-500 hover:rotate-x-2">
-              {/* Decorative Elements */}
-              <div className="absolute top-0 left-0 w-32 h-32 bg-[#D4A018]/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
-              <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#D4A018]/5 rounded-full translate-x-1/4 translate-y-1/4" />
+            <div className="card-gold rounded-[2.5rem] p-8 md:p-16 overflow-hidden transform hover:scale-[1.01] transition-transform duration-700">
 
-              <div className="relative">
-                {/* Teams Display */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
+              {/* Decorative Glows */}
+              <div className="absolute top-0 left-0 w-64 h-64 bg-[var(--rl-gold)]/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
+              <div className="absolute bottom-0 right-0 w-64 h-64 bg-[var(--rl-emerald)]/10 rounded-full blur-[100px] translate-x-1/4 translate-y-1/4" />
+
+              <div className="relative flex flex-col items-center">
+
+                {/* Teams Layout */}
+                <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-12 items-center mb-12">
+
                   {/* Home Team */}
-                  <div
-                    className="flex flex-col items-center"
-                  >
-                    <div
-                      className="w-24 h-24 md:w-32 md:h-32 rounded-2xl flex items-center justify-center text-4xl md:text-5xl font-black mb-4 shadow-xl overflow-hidden bg-[#0B0F1C]"
-                      style={{
-                        border: `2px solid ${match.home?.colors?.primary || '#D4A018'}`
-                      }}
-                    >
+                  <div className="flex flex-col items-center justify-center text-center group">
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-[var(--rl-navy-light)] border border-[var(--rl-gold)]/30 flex items-center justify-center p-6 shadow-2xl mb-6 group-hover:shadow-[0_0_30px_var(--rl-gold)]/20 transition-all duration-500">
                       {match.home?.logoPath ? (
-                        <img src={match.home.logoPath} alt={match.home.teamName} className="w-full h-full object-cover" />
+                        <img src={match.home.logoPath} alt={match.home.teamName} className="w-full h-full object-contain filter drop-shadow-lg" />
                       ) : (
-                        <span style={{ color: match.home?.colors?.secondary || '#F4F6FA' }}>
-                          {match.home?.shortName}
-                        </span>
+                        <span className="text-4xl font-black text-[var(--rl-gold)]">{match.home?.shortName}</span>
                       )}
                     </div>
-                    <h3 className="text-xl md:text-2xl font-display font-bold text-[#F4F6FA] text-center">
-                      {match.home?.teamName || 'Home Team'}
-                    </h3>
-                    <p className="text-sm text-[#A9B3C7]">{match.home?.cohort || 'TBD'}</p>
+                    <h3 className="text-2xl md:text-3xl font-display font-black text-white mb-2">{match.home?.teamName}</h3>
+                    <div className="badge px-3 py-1 rounded-full bg-[var(--rl-gold)]/10 text-[var(--rl-gold)] text-xs font-bold uppercase tracking-wider border border-[var(--rl-gold)]/20">
+                      {match.home?.cohort}
+                    </div>
                   </div>
 
-                  {/* VS Badge */}
-                  <div
-                    className="flex flex-col items-center"
-                  >
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-full bg-[#D4A018] flex items-center justify-center shadow-lg shadow-[#D4A018]/30">
-                        <span className="text-2xl font-display font-black text-[#0B0F1C]">VS</span>
+                  {/* VS / Info */}
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="relative mb-8">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--rl-gold)] to-[var(--rl-gold-dark)] flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.4)] z-10 relative">
+                        <span className="text-3xl font-display font-black text-[var(--rl-navy)]">VS</span>
                       </div>
-                      {/* Pulse only if relevant */}
-                      <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-[#D4A018]/30 animate-ping" />
+                      <div className="absolute inset-0 rounded-full bg-[var(--rl-gold)] animate-ping opacity-20" />
+                    </div>
+
+                    <div className="flex flex-col gap-3 w-full">
+                      <div className="flex items-center justify-center gap-2 text-[var(--rl-gray)] bg-[var(--rl-navy-light)]/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
+                        <Calendar className="w-4 h-4 text-[var(--rl-gold)]" />
+                        <span className="font-mono text-sm">{match?.date}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-[var(--rl-gray)] bg-[var(--rl-navy-light)]/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
+                        <MapPin className="w-4 h-4 text-[var(--rl-emerald)]" />
+                        <span className="font-mono text-sm">{match?.time} • {match?.venue}</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Away Team */}
-                  <div
-                    className="flex flex-col items-center"
-                  >
-                    <div
-                      className="w-24 h-24 md:w-32 md:h-32 rounded-2xl flex items-center justify-center text-4xl md:text-5xl font-black mb-4 shadow-xl overflow-hidden bg-[#0B0F1C]"
-                      style={{
-                        border: `2px solid ${match.away?.colors?.primary || '#3B82F6'}`
-                      }}
-                    >
+                  <div className="flex flex-col items-center justify-center text-center group">
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-[var(--rl-navy-light)] border border-[var(--rl-emerald)]/30 flex items-center justify-center p-6 shadow-2xl mb-6 group-hover:shadow-[0_0_30px_var(--rl-emerald)]/20 transition-all duration-500">
                       {match.away?.logoPath ? (
-                        <img src={match.away.logoPath} alt={match.away.teamName} className="w-full h-full object-cover" />
+                        <img src={match.away.logoPath} alt={match.away.teamName} className="w-full h-full object-contain filter drop-shadow-lg" />
                       ) : (
-                        <span style={{ color: match.away?.colors?.secondary || '#F4F6FA' }}>
-                          {match.away?.shortName}
-                        </span>
+                        <span className="text-4xl font-black text-[var(--rl-emerald)]">{match.away?.shortName}</span>
                       )}
                     </div>
-                    <h3 className="text-xl md:text-2xl font-display font-bold text-[#F4F6FA] text-center">
-                      {match.away?.teamName || 'Away Team'}
-                    </h3>
-                    <p className="text-sm text-[#A9B3C7]">{match.away?.cohort || 'TBD'}</p>
+                    <h3 className="text-2xl md:text-3xl font-display font-black text-white mb-2">{match.away?.teamName}</h3>
+                    <div className="badge px-3 py-1 rounded-full bg-[var(--rl-emerald)]/10 text-[var(--rl-emerald)] text-xs font-bold uppercase tracking-wider border border-[var(--rl-emerald)]/20">
+                      {match.away?.cohort}
+                    </div>
                   </div>
-                </div>
 
-                {/* Match Details */}
-                <div
-                  className="flex flex-wrap items-center justify-center gap-6 mb-8"
-                >
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#141B2D]">
-                    <Calendar className="w-4 h-4 text-[#D4A018]" />
-                    <span className="text-sm text-[#F4F6FA]">{match?.date} • {match?.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#141B2D]">
-                    <MapPin className="w-4 h-4 text-[#D4A018]" />
-                    <span className="text-sm text-[#F4F6FA]">{match?.venue}</span>
-                  </div>
                 </div>
 
                 {/* CTA */}
-                <div
-                  className="flex justify-center"
-                >
-                  <button className="btn-primary flex items-center gap-2 group">
-                    {t('mod.details')}
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
+                <button className="btn-primary flex items-center gap-3 group text-lg px-8 py-4 shadow-xl">
+                  {t('mod.details')}
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </button>
+
               </div>
             </div>
           </div>

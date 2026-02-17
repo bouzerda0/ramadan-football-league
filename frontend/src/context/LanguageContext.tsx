@@ -34,7 +34,7 @@ const translations = {
 
 // Standings
 'standings.title': { ar: 'الترتيب', fr: 'CLASSEMENT', en: 'STANDINGS' },
-'standings.subtitle': { ar: 'ترتيب دور المجموعات بعد الجولة 2', fr: 'Classement groupes après Journée 2', en: 'Group stage rankings after Matchday 2' },
+'standings.subtitle': { ar: '', fr: '', en: '' },
 'standings.team': { ar: 'الفريق', fr: 'Équipe', en: 'Team' },
 'standings.mp': { ar: 'ل', fr: 'MJ', en: 'MP' },
 'standings.w': { ar: 'ف', fr: 'V', en: 'W' },

@@ -66,6 +66,8 @@ export interface Match {
     home: string[];
     away: string[];
   };
+  homeTeam?: BackendTeam;
+  awayTeam?: BackendTeam;
 }
 
 export interface MatchEvent {
@@ -130,7 +132,7 @@ export interface BackendPlayer {
 
 export interface BackendTeam {
   id: string;
-  teamName: string;
+  name: string;
   captainName: string;
   logoPath: string;
   players?: BackendPlayer[];

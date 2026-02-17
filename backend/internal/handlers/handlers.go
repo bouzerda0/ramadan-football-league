@@ -172,9 +172,11 @@ func GetMatches(c *gin.Context) {
 
 	var matches []models.Match
 	if err := query.Order("matchday ASC, date ASC").Find(&matches).Error; err != nil {
+		log.Printf("❌ [GetMatches] DB Error: %v", err)
 		errorResponse(c, http.StatusInternalServerError, "Failed to fetch matches")
 		return
 	}
+	log.Printf("✅ [GetMatches] Found %d matches", len(matches))
 	success(c, matches)
 }
 

@@ -108,6 +108,8 @@ export default function AdminMatches() {
                 const result = await matchesRes.json();
                 const matchesData = result.data || result || [];
                 setMatches((Array.isArray(matchesData) ? matchesData : []).map((m: Match) => ({ ...m, events: m.events || [] })));
+            } else {
+                console.error('Failed to fetch matches:', matchesRes.status);
             }
             if (teamsRes.ok) {
                 const result = await teamsRes.json();
@@ -154,7 +156,7 @@ export default function AdminMatches() {
         if (!selectedMatch) return;
 
         try {
-            const response = await fetch(`${API_URL}/api/admin/matches`, {
+            const response = await fetch(`${API_URL}/api/admin/matches/${selectedMatch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedMatch),
@@ -177,7 +179,7 @@ export default function AdminMatches() {
     const handleDeleteMatch = async () => {
         if (!selectedMatch) return;
         try {
-            const response = await fetch(`${API_URL}/api/admin/matches?id=${selectedMatch.id}`, {
+            const response = await fetch(`${API_URL}/api/admin/matches/${selectedMatch.id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {

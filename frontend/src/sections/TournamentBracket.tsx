@@ -16,7 +16,7 @@ interface Match {
 
 interface Team {
     id: string;
-    teamName: string;
+    name: string;
     logoPath: string;
 }
 
@@ -77,7 +77,7 @@ export default function TournamentBracket() {
                             <div className="w-6 h-6 bg-[#374151] rounded-full"></div>
                         )}
                         <span className={`text-sm font-medium ${match?.homeScore !== undefined && match?.awayScore !== undefined && match.homeScore > match.awayScore ? 'text-[#D4A018]' : 'text-[#F4F6FA]'}`}>
-                            {home?.teamName || 'TBD'}
+                            {home?.name || 'TBD'}
                         </span>
                     </div>
                     <span className="font-mono font-bold text-[#F4F6FA]">{match?.homeScore ?? '-'}</span>
@@ -92,7 +92,7 @@ export default function TournamentBracket() {
                             <div className="w-6 h-6 bg-[#374151] rounded-full"></div>
                         )}
                         <span className={`text-sm font-medium ${match?.homeScore !== undefined && match?.awayScore !== undefined && match.awayScore > match.homeScore ? 'text-[#D4A018]' : 'text-[#F4F6FA]'}`}>
-                            {away?.teamName || 'TBD'}
+                            {away?.name || 'TBD'}
                         </span>
                     </div>
                     <span className="font-mono font-bold text-[#F4F6FA]">{match?.awayScore ?? '-'}</span>

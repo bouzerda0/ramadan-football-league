@@ -29,19 +29,24 @@
     --ring: 48 90% 55%;
     --radius: 0.75rem;
 
-    /* Custom Ramadan League Colors - Premium Palette */
-    --rl-navy: #040710;
-    --rl-navy-light: #0D1321;
+    /* Custom Ramadan League Colors - Cyber-Ramadan Palette */
+    --rl-navy: #020408;
+    /* Deepest Navy */
+    --rl-navy-light: #0A0F1C;
+    /* Rich Navy */
     --rl-emerald: #10B981;
     --rl-emerald-dark: #064E3B;
-    --rl-gold: #FACC15;
-    /* Brighter Gold */
-    --rl-gold-light: #FDE047;
-    --rl-gold-dark: #CA8A04;
-    --rl-white: #FDFDF8;
-    /* Warm White */
+    --rl-gold: #D4AF37;
+    /* Metallic Gold */
+    --rl-gold-light: #F4C430;
+    /* Bright Gold */
+    --rl-gold-dark: #AA8C2C;
+    /* Dark Gold */
+    --rl-white: #F8FAFC;
     --rl-gray: #94A3B8;
     --rl-gray-dark: #475569;
+
+    --rl-glow: 0 0 20px rgba(212, 175, 55, 0.3);
   }
 
   /* Custom Animations */
@@ -112,45 +117,45 @@
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A018' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
-  /* Gold Gradient Text - Premium */
+  /* Gold Gradient Text - Cyber Metallic */
   .text-gold-gradient {
-    background: linear-gradient(135deg, #FACC15 0%, #FDE047 50%, #CA8A04 100%);
+    background: linear-gradient(135deg, var(--rl-gold) 0%, var(--rl-gold-light) 50%, var(--rl-gold-dark) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.3));
+    filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
   }
 
   /* Gold Border Gradient */
   .border-gold-gradient {
-    border-image: linear-gradient(135deg, #FACC15, #FDE047, #CA8A04) 1;
+    border-image: linear-gradient(135deg, var(--rl-gold), var(--rl-gold-light), var(--rl-gold-dark)) 1;
   }
 
-  /* Card with Gold Border - Premium */
+  /* Card with Gold Border - Cyber */
   .card-gold {
-    @apply bg-[#0D1321]/80 backdrop-blur-xl;
-    border: 1px solid rgba(250, 204, 21, 0.15);
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.05);
+    @apply bg-[#0A0F1C]/90 backdrop-blur-xl;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 0 30px -5px rgba(0, 0, 0, 0.8), 0 0 10px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(212, 175, 55, 0.05);
   }
 
   /* Glass Effect - Deep */
   .glass {
-    @apply bg-[#0D1321]/60 backdrop-blur-md border border-white/5;
+    @apply bg-[#0A0F1C]/70 backdrop-blur-md border border-white/10;
   }
 
   /* Button Styles - Cyber */
   .btn-primary {
-    @apply bg-[#FACC15] text-[#040710] font-bold px-6 py-3 rounded-xl;
-    @apply hover:bg-[#FDE047] transition-all duration-300;
-    @apply hover:shadow-[0_0_20px_-5px_rgba(250,204,21,0.5)];
+    @apply bg-[var(--rl-gold)] text-[var(--rl-navy)] font-bold px-6 py-3 rounded-xl;
+    @apply hover:bg-[var(--rl-gold-light)] transition-all duration-300;
+    @apply hover:shadow-[0_0_30px_-5px_rgba(212, 175, 55, 0.8)];
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .btn-secondary {
-    @apply bg-[#0D1321]/50 text-[#FDFDF8] font-bold px-6 py-3 rounded-xl;
-    @apply border border-[#FACC15]/30;
-    @apply hover:bg-[#FACC15]/10 hover:border-[#FACC15] transition-all duration-300;
+    @apply bg-[var(--rl-navy-light)]/50 text-[var(--rl-white)] font-bold px-6 py-3 rounded-xl;
+    @apply border border-[var(--rl-gold)]/30;
+    @apply hover:bg-[var(--rl-gold)]/10 hover:border-[var(--rl-gold)] transition-all duration-300;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }

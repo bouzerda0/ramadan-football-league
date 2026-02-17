@@ -58,6 +58,9 @@ func main() {
 		api.GET("/standings", handlers.GetStandings)
 		// api.GET("/stats", handlers.GetLeagueStats)
 
+		// Public Registration
+		api.POST("/register", handlers.RegisterTeam)
+
 		// Admin Login (POST)
 		api.POST("/admin/login", handlers.AdminLogin)
 
@@ -65,6 +68,13 @@ func main() {
 		protected := api.Group("/admin")
 		protected.Use(handlers.AdminMiddleware())
 		{
+			protected.GET("/teams", handlers.GetTeams)     // Used by AdminMatches
+			protected.GET("/matches", handlers.GetMatches) // Used by AdminMatches
+
+			protected.POST("/matches", handlers.CreateMatch)
+			protected.PUT("/matches/:id", handlers.UpdateMatch)
+			protected.DELETE("/matches/:id", handlers.DeleteMatch)
+
 			protected.POST("/config", handlers.UpdateConfig)
 			protected.POST("/matches/generate", handlers.GenerateMatches)
 			protected.POST("/teams/generate", handlers.GenerateTeams)
