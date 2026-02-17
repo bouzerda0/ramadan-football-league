@@ -62,7 +62,7 @@ export default function TournamentBracket() {
         const away = match ? getTeam(match.awayTeamId) : null;
 
         return (
-            <div className="w-64 bg-[#141B2D] border border-[#D4A018]/20 rounded-lg overflow-hidden shrink-0 relative">
+            <div className="w-64 bg-[#0D1321]/80 border border-[#FACC15]/20 rounded-xl overflow-hidden shrink-0 relative backdrop-blur-md shadow-lg group hover:border-[#FACC15]/50 transition-all">
                 <div className="bg-[#0B0F1C] px-3 py-1 text-xs text-[#A9B3C7] border-b border-[#D4A018]/10 flex justify-between">
                     <span>{label}</span>
                     {match && <span className="text-[#D4A018]">{match.date}</span>}
@@ -104,8 +104,9 @@ export default function TournamentBracket() {
     if (loading) return null;
 
     return (
-        <section className="py-20 bg-[#0B0F1C] relative overflow-x-auto" dir={dir}>
-            <div className="min-w-[1000px] max-w-7xl mx-auto px-4">
+        <section className="py-20 bg-[#040710] relative overflow-x-auto" dir={dir}>
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay" />
+            <div className="min-w-[1000px] max-w-7xl mx-auto px-4 relative z-10">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-display font-bold text-[#F4F6FA] flex items-center justify-center gap-3">
                         <Trophy className="w-8 h-8 text-[#D4A018]" />

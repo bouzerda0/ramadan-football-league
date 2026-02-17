@@ -133,14 +133,15 @@ export default function MatchOfTheDay() {
     <section
       ref={ref}
       id="match-of-day"
-      className="relative min-h-screen w-full overflow-hidden bg-[#0B0F1C]"
+      className="relative min-h-screen w-full overflow-hidden bg-[#040710]"
       dir={dir}
     >
       {/* ... existing render logic ... */}
       {/* Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0D1A12] via-[#0B0F1C] to-[#141B2D]" />
-        <div className="absolute inset-0 islamic-pattern opacity-30" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0D1321] via-[#040710] to-[#000000]" />
+        <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+        <div className="absolute -bottom-1/2 left-0 right-0 h-1/2 bg-gradient-to-t from-[#FACC15]/5 to-transparent blur-3xl" />
       </div>
 
       {/* Content */}
@@ -160,10 +161,8 @@ export default function MatchOfTheDay() {
           </div>
 
           {/* Match Card */}
-          <div
-            className="relative"
-          >
-            <div className="card-gold rounded-3xl p-8 md:p-12 overflow-hidden">
+          <div className="relative z-20 perspective-1000">
+            <div className="card-gold rounded-3xl p-8 md:p-14 overflow-hidden transform transition-transform duration-500 hover:rotate-x-2">
               {/* Decorative Elements */}
               <div className="absolute top-0 left-0 w-32 h-32 bg-[#D4A018]/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
               <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#D4A018]/5 rounded-full translate-x-1/4 translate-y-1/4" />

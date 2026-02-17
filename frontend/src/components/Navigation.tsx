@@ -61,27 +61,27 @@ export default function Navigation() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-          ? 'bg-[#0B0F1C]/90 backdrop-blur-lg border-b border-[#D4A018]/20'
-          : 'bg-transparent'
+          ? 'bg-[#040710]/80 backdrop-blur-md border-b border-[#FACC15]/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
+          : 'bg-transparent py-4'
           }`}
         dir={dir}
       >
         <div className="section-padding">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#D4A018] flex items-center justify-center transition-transform group-hover:scale-110 overflow-hidden">
+            <button onClick={() => navigate('/')} className="flex items-center gap-3 group">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-[#FACC15] to-[#CA8A04] flex items-center justify-center transition-transform group-hover:scale-105 shadow-[0_0_15px_rgba(250,204,21,0.3)]">
                 {config.logoPath ? (
-                  <img src={config.logoPath} alt="Logo" className="w-full h-full object-cover" />
+                  <img src={config.logoPath} alt="Logo" className="w-full h-full object-cover rounded-xl" />
                 ) : (
-                  <Trophy className="w-4 h-4 md:w-5 md:h-5 text-[#0B0F1C]" />
+                  <Trophy className="w-5 h-5 md:w-6 md:h-6 text-[#040710]" />
                 )}
               </div>
-              <div className="text-left">
-                <span className="font-display font-bold text-[#F4F6FA] text-sm md:text-base block">
+              <div className="text-left hidden sm:block">
+                <span className="font-display font-black text-[#FDFDF8] text-lg tracking-tight uppercase leading-none block">
                   {config.title}
                 </span>
-                <span className="block text-[10px] text-[#D4A018]">{config.subtitle}</span>
+                <span className="block text-[10px] font-bold text-[#FACC15] tracking-widest uppercase mt-0.5">{config.subtitle}</span>
               </div>
             </button>
 

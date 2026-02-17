@@ -87,12 +87,12 @@ export default function Standings() {
     <section
       ref={ref}
       id="standings"
-      className="relative w-full py-20 bg-[#0B0F1C]"
+      className="relative w-full py-20 bg-[#040710]"
       dir={dir}
     >
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0F1C] via-[#0D1A12]/30 to-[#0B0F1C]" />
-        <div className="absolute inset-0 islamic-pattern opacity-20" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#0D1321] via-[#040710] to-[#000000]" />
+        <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
       </div>
 
       <div className="relative z-10 section-padding">
@@ -102,19 +102,19 @@ export default function Standings() {
               }`}
           >
             <div className="flex items-center gap-3 mb-4">
-              <Trophy className="w-8 h-8 text-[#D4A018]" />
-              <h2 className="text-section font-display font-black text-[#F4F6FA]">
+              <Trophy className="w-8 h-8 text-[#FACC15]" />
+              <h2 className="text-section font-display font-black text-[#FDFDF8]">
                 {t('standings.title') || "League Standings"}
               </h2>
             </div>
-            <p className="text-[#A9B3C7] text-lg">{t('standings.subtitle') || "Track the progress of all teams"}</p>
+            <p className="text-[#94A3B8] text-lg font-ui">{t('standings.subtitle') || "Track the progress of all teams"}</p>
           </div>
 
           <div
-            className={`card-gold rounded-2xl overflow-hidden transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+            className={`card-gold rounded-3xl overflow-hidden transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
               }`}
           >
-            <div className="grid grid-cols-12 gap-2 p-4 bg-[#141B2D] border-b border-[#D4A018]/20 text-xs font-ui font-semibold text-[#A9B3C7] uppercase tracking-wider">
+            <div className="grid grid-cols-12 gap-2 p-6 bg-[#0D1321]/80 border-b border-[#FACC15]/20 text-xs font-bold text-[#FACC15] uppercase tracking-widest">
               <div className="col-span-1 text-center">#</div>
               <div className="col-span-4 md:col-span-3">Team</div>
               <div className="col-span-1 text-center hidden md:block">MP</div>
@@ -127,13 +127,13 @@ export default function Standings() {
               <div className="col-span-2 md:col-span-1 text-center">Pts</div>
             </div>
 
-            <div className="divide-y divide-[#D4A018]/10">
+            <div className="divide-y divide-[#FACC15]/10">
               {loading ? (
-                <div className="text-center py-10 text-[#D4A018]">Connecting to server...</div>
+                <div className="text-center py-10 text-[#FACC15] animate-pulse">Connecting to server...</div>
               ) : teams.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-[#A9B3C7] font-semibold">No data found</p>
-                  <p className="text-sm text-[#6B7280] mt-1">Check if Backend (main.go) is running</p>
+                <div className="text-center py-12">
+                  <p className="text-[#94A3B8] font-semibold text-lg">No data found</p>
+                  <p className="text-sm text-[#475569] mt-2">Check if Backend (main.go) is running</p>
                 </div>
               ) : (
                 teams.map((team: Team, index: number) => {
@@ -142,7 +142,7 @@ export default function Standings() {
                     <div
                       key={team.id}
                       className={`grid grid-cols-12 gap-2 p-4 items-center table-row-hover transition-all duration-500 group ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
-                        } ${index === 0 ? 'bg-[#D4A018]/5' : ''}`}
+                        } ${index === 0 ? 'bg-[#FACC15]/10' : ''}`}
                       style={{ transitionDelay: `${300 + index * 100}ms` }}
                     >
                       <div className="col-span-1 text-center">

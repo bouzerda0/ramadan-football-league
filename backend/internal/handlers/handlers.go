@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -230,7 +231,8 @@ func RegisterTeam(c *gin.Context) {
 
 	// Parse multipart form
 	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
-		errorResponse(c, http.StatusBadRequest, "Failed to parse form data")
+		log.Printf("❌ [RegisterTeam] Failed to parse multipart form: %v", err)
+		errorResponse(c, http.StatusBadRequest, "Failed to parse form data: "+err.Error())
 		return
 	}
 
@@ -241,8 +243,11 @@ func RegisterTeam(c *gin.Context) {
 	captainPhone := c.PostForm("captainPhone")
 	playersJSON := c.PostForm("players")
 
+	log.Printf("📝 [RegisterTeam] Request received: Team=%s, Captain=%s", teamName, captainName)
+
 	// Validate required fields
 	if teamName == "" || captainName == "" || captainEmail == "" || captainPhone == "" {
+		log.Println("❌ [RegisterTeam] Missing required fields")
 		errorResponse(c, http.StatusBadRequest, "Missing required fields")
 		return
 	}
@@ -255,40 +260,56 @@ func RegisterTeam(c *gin.Context) {
 	if playersJSON != "" {
 		// Parse players JSON string
 		if err := json.Unmarshal([]byte(playersJSON), &playersData); err != nil {
+			log.Printf("❌ [RegisterTeam] Invalid players JSON: %v", err)
 			errorResponse(c, http.StatusBadRequest, "Invalid players data")
 			return
 		}
 	}
 
-	// Handle logo upload (optional)
+	// Handle logo upload
 	logoPath := ""
 	file, header, err := c.Request.FormFile("logo")
 	if err == nil {
 		defer file.Close()
-
-		// Save file to uploads directory
 		uploadDir := "./uploads/logos"
 		if err := os.MkdirAll(uploadDir, 0755); err != nil {
+			log.Printf("❌ [RegisterTeam] Failed to create upload dir: %v", err)
 			errorResponse(c, http.StatusInternalServerError, "Failed to create upload directory")
 			return
 		}
 
 		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), header.Filename)
-		filepath := filepath.Join(uploadDir, filename)
+		savePath := filepath.Join(uploadDir, filename)
 
-		out, err := os.Create(filepath)
+		out, err := os.Create(savePath)
 		if err != nil {
+			log.Printf("❌ [RegisterTeam] Failed to create logo file: %v", err)
 			errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
 			return
 		}
 		defer out.Close()
 
 		if _, err := io.Copy(out, file); err != nil {
+			log.Printf("❌ [RegisterTeam] Failed to write logo file: %v", err)
 			errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
 			return
 		}
 
 		logoPath = "/uploads/logos/" + filename
+	}
+
+	// Start Transaction
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if tx.Error != nil {
+		log.Printf("❌ [RegisterTeam] Failed to start transaction: %v", tx.Error)
+		errorResponse(c, http.StatusInternalServerError, "Database error")
+		return
 	}
 
 	// Create team
@@ -301,8 +322,10 @@ func RegisterTeam(c *gin.Context) {
 		LogoPath:     logoPath,
 	}
 
-	if err := db.Create(&team).Error; err != nil {
-		errorResponse(c, http.StatusInternalServerError, "Failed to create team")
+	if err := tx.Create(&team).Error; err != nil {
+		tx.Rollback()
+		log.Printf("❌ [RegisterTeam] Failed to create team in DB: %v", err)
+		errorResponse(c, http.StatusInternalServerError, "Failed to create team: "+err.Error())
 		return
 	}
 
@@ -317,12 +340,25 @@ func RegisterTeam(c *gin.Context) {
 			Number:   i + 1,
 			Position: models.PositionMID, // Default position
 		}
-		db.Create(&player)
+		if err := tx.Create(&player).Error; err != nil {
+			tx.Rollback()
+			log.Printf("❌ [RegisterTeam] Failed to create player %s: %v", pd.Name, err)
+			errorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Failed to create player %s", pd.Name))
+			return
+		}
 	}
 
-	// Reload team with players
+	// Commit Transaction
+	if err := tx.Commit().Error; err != nil {
+		log.Printf("❌ [RegisterTeam] Failed to commit transaction: %v", err)
+		errorResponse(c, http.StatusInternalServerError, "Failed to commit transaction")
+		return
+	}
+
+	// Reload team with players for response
 	db.Preload("Players").First(&team, "id = ?", team.ID)
 
+	log.Printf("✅ [RegisterTeam] Successfully registered team: %s (ID: %s)", team.Name, team.ID)
 	success(c, team)
 }
 
@@ -360,7 +396,17 @@ func CreateTeam(c *gin.Context) {
 		team.ShortName = utils.GenerateShortName(team.Name)
 	}
 
-	if err := db.Create(&team).Error; err != nil {
+	// Start Transaction
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Create(&team).Error; err != nil {
+		tx.Rollback()
+		log.Printf("❌ [CreateTeam] Failed to create team: %v", err)
 		errorResponse(c, http.StatusInternalServerError, "Failed to create team")
 		return
 	}
@@ -368,8 +414,20 @@ func CreateTeam(c *gin.Context) {
 	// Create default players
 	players := utils.GenerateDefaultPlayers(team.ID)
 	for i := range players {
-		db.Create(&players[i])
+		if err := tx.Create(&players[i]).Error; err != nil {
+			tx.Rollback()
+			log.Printf("❌ [CreateTeam] Failed to create default player %d: %v", i, err)
+			errorResponse(c, http.StatusInternalServerError, "Failed to create default players")
+			return
+		}
 	}
+
+	if err := tx.Commit().Error; err != nil {
+		log.Printf("❌ [CreateTeam] Failed to commit transaction: %v", err)
+		errorResponse(c, http.StatusInternalServerError, "Failed to create team")
+		return
+	}
+
 	team.Players = players
 
 	success(c, team)
@@ -546,6 +604,7 @@ func CreateMatch(c *gin.Context) {
 
 	var match models.Match
 	if err := c.ShouldBindJSON(&match); err != nil {
+		log.Printf("❌ [CreateMatch] Invalid JSON: %v", err)
 		errorResponse(c, http.StatusBadRequest, "Invalid match data")
 		return
 	}
@@ -553,10 +612,12 @@ func CreateMatch(c *gin.Context) {
 	// Verify teams exist
 	var homeTeam, awayTeam models.Team
 	if err := db.First(&homeTeam, "id = ?", match.HomeTeamID).Error; err != nil {
+		log.Printf("❌ [CreateMatch] Home team not found: %s", match.HomeTeamID)
 		errorResponse(c, http.StatusBadRequest, "Home team not found")
 		return
 	}
 	if err := db.First(&awayTeam, "id = ?", match.AwayTeamID).Error; err != nil {
+		log.Printf("❌ [CreateMatch] Away team not found: %s", match.AwayTeamID)
 		errorResponse(c, http.StatusBadRequest, "Away team not found")
 		return
 	}
@@ -567,10 +628,12 @@ func CreateMatch(c *gin.Context) {
 	}
 
 	if err := db.Create(&match).Error; err != nil {
+		log.Printf("❌ [CreateMatch] Database creation failed: %v", err)
 		errorResponse(c, http.StatusInternalServerError, "Failed to create match")
 		return
 	}
 
+	log.Printf("✅ [CreateMatch] Match created between %s and %s", homeTeam.Name, awayTeam.Name)
 	success(c, match)
 }
 

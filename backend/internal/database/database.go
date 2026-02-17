@@ -30,7 +30,8 @@ func Init(dbPath string) error {
 		})
 	} else {
 		// 2. Fallback to SQLite (Local / Development)
-		log.Println("📂 Connecting to SQLite (Pure Go)...")
+		absPath, _ := filepath.Abs(dbPath)
+		log.Printf("📂 Connecting to SQLite at: %s", absPath)
 
 		dir := filepath.Dir(dbPath)
 		if err := os.MkdirAll(dir, 0755); err != nil {
