@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { API_URL } from '@/lib/api';
+import { getAssetUrl } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePrayerTimes } from '@/hooks/usePrayerTimes';
 import { ChevronDown, Moon, Star, Trophy } from 'lucide-react';
@@ -24,7 +25,7 @@ export default function Hero() {
             id: t.id,
             name: t.name || t.teamName || 'Unknown Team',
             shortName: (t.name || t.teamName || 'UNK').substring(0, 3).toUpperCase(),
-            logo: t.logoPath || '',
+            logo: getAssetUrl(t.logoPath),
             colors: { primary: t.primaryColor || '#D4AF37', secondary: t.secondaryColor || '#020408' }
           }));
           setTeams(mappedTeams.slice(0, 8));

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Upload, Globe, Image, Trophy, RefreshCw } from 'lucide-react';
+import { Save, Globe, Image, Trophy, RefreshCw } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { API_URL } from '@/lib/api';
 
@@ -16,16 +16,40 @@ export default function Settings() {
         setSaveMessage(null);
 
         try {
-            const response = await fetch(`${API_URL}/api/admin/config`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(config),
-            });
+            let response;
+
+            if (logoFile) {
+                // If there's a file, we MUST use FormData
+                const formData = new FormData();
+                formData.append('logo', logoFile);
+                formData.append('title', config.title);
+                formData.append('subtitle', config.subtitle);
+                formData.append('heroSubtitle', config.heroSubtitle);
+                formData.append('heroTitle1', config.heroTitle1);
+                formData.append('heroTitle2', config.heroTitle2);
+                formData.append('heroTitle3', config.heroTitle3);
+                formData.append('matchStage', config.matchStage);
+                formData.append('featuredMatchId', config.featuredMatchId);
+                formData.append('autoUpdateMatches', String(config.autoUpdateMatches));
+
+                response = await fetch(`${API_URL}/api/admin/config`, {
+                    method: 'PUT',
+                    body: formData,
+                });
+            } else {
+                // Otherwise, JSON is fine
+                response = await fetch(`${API_URL}/api/admin/config`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config),
+                });
+            }
 
             if (response.ok) {
                 // Refresh the global config so homepage picks up changes immediately
                 refreshConfig();
-                setSaveMessage({ type: 'success', text: '✅ Settings saved! Changes are now live on the homepage.' });
+                setSaveMessage({ type: 'success', text: '✅ Settings saved! Changes are now live.' });
+                setLogoFile(null); // Clear the file selection after save
             } else {
                 setSaveMessage({ type: 'error', text: 'Failed to save settings' });
             }
@@ -37,31 +61,9 @@ export default function Settings() {
         }
     };
 
-    const handleLogoUpload = async () => {
-        if (!logoFile || !config) return;
-
-        const formData = new FormData();
-        formData.append('logo', logoFile);
-        formData.append('title', config.title);
-        formData.append('subtitle', config.subtitle);
-
-        try {
-            const response = await fetch(`${API_URL}/api/admin/config`, {
-                method: 'PUT',
-                body: formData,
-            });
-
-            if (response.ok) {
-                setLogoFile(null);
-                setPreviewLogo(null);
-                refreshConfig();
-                setSaveMessage({ type: 'success', text: '✅ Logo uploaded! Changes are now live.' });
-            }
-        } catch (error) {
-            console.error('Error uploading logo:', error);
-            setSaveMessage({ type: 'error', text: 'Failed to upload logo' });
-        }
-    };
+    // handleLogoUpload is no longer needed as a separate function, 
+    // but we'll keep the file change handler.
+    // Removed handleLogoUpload to avoid confusion.
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -157,12 +159,9 @@ export default function Settings() {
                                     />
                                 </div>
                                 {logoFile && (
-                                    <button
-                                        onClick={handleLogoUpload}
-                                        className="flex items-center gap-1 bg-[#D4A018] text-[#0B0F1C] px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-[#B38612] flex-shrink-0"
-                                    >
-                                        <Upload className="w-3 h-3" /> Upload
-                                    </button>
+                                    <span className="text-xs text-[var(--rl-gold)] font-bold px-3">
+                                        Ready to save
+                                    </span>
                                 )}
                             </div>
                         </div>

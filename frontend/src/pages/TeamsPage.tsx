@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation';
 // import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useState } from 'react';
 import { API_URL } from '@/lib/api';
+import { getAssetUrl } from '@/lib/utils';
 import { Users, Trophy, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -110,7 +111,7 @@ export default function TeamsPage() {
                                     <div className="flex items-center gap-4 mb-6">
                                         <div className="w-16 h-16 rounded-full bg-[#0B0F1C] border border-[#D4A018]/20 flex items-center justify-center overflow-hidden shrink-0">
                                             {team.logoPath ? (
-                                                <img src={team.logoPath} alt={team.teamName} className="w-full h-full object-cover" />
+                                                <img src={getAssetUrl(team.logoPath)} alt={team.teamName} className="w-full h-full object-cover" />
                                             ) : (
                                                 <Trophy className="w-8 h-8 text-[#D4A018]" />
                                             )}

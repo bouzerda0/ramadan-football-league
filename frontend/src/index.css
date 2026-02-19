@@ -147,15 +147,27 @@
   .btn-primary {
     @apply bg-[var(--rl-gold)] text-[var(--rl-navy)] font-bold px-6 py-3 rounded-xl;
     @apply hover:bg-[var(--rl-gold-light)] transition-all duration-300;
-    @apply hover:shadow-[0_0_30px_-5px_rgba(212, 175, 55, 0.8)];
+
+    &:hover {
+      box-shadow: 0 0 30px -5px rgba(212, 175, 55, 0.8);
+    }
+
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .btn-secondary {
-    @apply bg-[var(--rl-navy-light)]/50 text-[var(--rl-white)] font-bold px-6 py-3 rounded-xl;
-    @apply border border-[var(--rl-gold)]/30;
-    @apply hover:bg-[var(--rl-gold)]/10 hover:border-[var(--rl-gold)] transition-all duration-300;
+    background-color: rgba(10, 15, 28, 0.5);
+    @apply text-[var(--rl-white)] font-bold px-6 py-3 rounded-xl;
+    @apply border;
+    border-color: rgba(212, 175, 55, 0.3);
+    @apply transition-all duration-300;
+
+    &:hover {
+      background-color: rgba(212, 175, 55, 0.1);
+      border-color: var(--rl-gold);
+    }
+
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }

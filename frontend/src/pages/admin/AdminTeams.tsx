@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '@/lib/api';
+import { getAssetUrl } from '@/lib/utils';
 import { Plus, Save, Trash2, Edit, Users, Trophy, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Player {
@@ -140,7 +141,7 @@ export default function AdminTeams() {
         if (!selectedTeam) return;
 
         try {
-            const response = await fetch(`${API_URL}/api/admin/teams`, {
+            const response = await fetch(`${API_URL}/api/admin/teams/${selectedTeam.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedTeam),
@@ -161,7 +162,7 @@ export default function AdminTeams() {
     const handleDeleteTeam = async () => {
         if (!selectedTeam) return;
         try {
-            const response = await fetch(`${API_URL}/api/admin/teams?id=${selectedTeam.id}`, {
+            const response = await fetch(`${API_URL}/api/admin/teams/${selectedTeam.id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {
@@ -305,7 +306,7 @@ export default function AdminTeams() {
                             >
                                 <div className="flex items-center gap-4">
                                     {team.logoPath ? (
-                                        <img src={team.logoPath} alt={team.name} className="w-12 h-12 rounded-full object-cover" />
+                                        <img src={getAssetUrl(team.logoPath)} alt={team.name} className="w-12 h-12 rounded-full object-cover" />
                                     ) : (
                                         <div className="w-12 h-12 rounded-full bg-[#D4A018]/20 flex items-center justify-center">
                                             <span className="text-[#D4A018] font-bold">{team.shortName || team.name.slice(0, 3).toUpperCase()}</span>

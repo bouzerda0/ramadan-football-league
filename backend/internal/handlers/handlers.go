@@ -15,6 +15,7 @@ import (
 	"ramadan-league/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -52,6 +53,7 @@ func GetConfig(c *gin.Context) {
 		errorResponse(c, http.StatusInternalServerError, "Failed to fetch config")
 		return
 	}
+	log.Printf("ℹ️ [GetConfig] Returning config: %+v", config)
 	success(c, config)
 }
 
@@ -388,14 +390,51 @@ func AdminLogin(c *gin.Context) {
 func CreateTeam(c *gin.Context) {
 	db := database.GetDB()
 
+	// Parse Multipart Form
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10 MB limit
+		errorResponse(c, http.StatusBadRequest, "Failed to parse form data")
+		return
+	}
+
 	var team models.Team
-	if err := c.ShouldBindJSON(&team); err != nil {
-		errorResponse(c, http.StatusBadRequest, "Invalid team data")
+	team.Name = c.PostForm("name")
+	team.ShortName = c.PostForm("shortName")
+	team.Cohort = c.PostForm("cohort")
+	team.Captain = c.PostForm("captain")
+	team.CaptainEmail = c.PostForm("captainEmail")
+	team.CaptainPhone = c.PostForm("captainPhone")
+	team.Motto = c.PostForm("motto")
+	team.PrimaryColor = c.PostForm("primaryColor")
+	team.SecondaryColor = c.PostForm("secondaryColor")
+	team.QRCode = c.PostForm("qrCode")
+
+	if team.Name == "" {
+		errorResponse(c, http.StatusBadRequest, "Team name is required")
 		return
 	}
 
 	if team.ShortName == "" {
 		team.ShortName = utils.GenerateShortName(team.Name)
+	}
+
+	// Handle Logo Upload
+	file, err := c.FormFile("logo")
+	if err == nil {
+		// Ensure uploads directory exists
+		uploadDir := "./uploads"
+		if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+			os.Mkdir(uploadDir, 0755)
+		}
+
+		// Save file
+		filename := fmt.Sprintf("team_%s_%s", uuid.New().String()[:8], filepath.Base(file.Filename))
+		filepath := filepath.Join(uploadDir, filename)
+		if err := c.SaveUploadedFile(file, filepath); err != nil {
+			log.Printf("❌ [CreateTeam] Failed to save logo: %v", err)
+			errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
+			return
+		}
+		team.LogoPath = "/uploads/" + filename
 	}
 
 	// Start Transaction
@@ -413,15 +452,39 @@ func CreateTeam(c *gin.Context) {
 		return
 	}
 
-	// Create default players
-	players := utils.GenerateDefaultPlayers(team.ID)
-	for i := range players {
-		if err := tx.Create(&players[i]).Error; err != nil {
+	// Handle Players
+	playersJSON := c.PostForm("players")
+	if playersJSON != "" {
+		var players []models.Player
+		if err := json.Unmarshal([]byte(playersJSON), &players); err != nil {
 			tx.Rollback()
-			log.Printf("❌ [CreateTeam] Failed to create default player %d: %v", i, err)
-			errorResponse(c, http.StatusInternalServerError, "Failed to create default players")
+			log.Printf("❌ [CreateTeam] Failed to parse players JSON: %v", err)
+			errorResponse(c, http.StatusBadRequest, "Invalid players data")
 			return
 		}
+
+		for i := range players {
+			players[i].TeamID = team.ID
+			if err := tx.Create(&players[i]).Error; err != nil {
+				tx.Rollback()
+				log.Printf("❌ [CreateTeam] Failed to create player %d: %v", i, err)
+				errorResponse(c, http.StatusInternalServerError, "Failed to create players")
+				return
+			}
+		}
+		team.Players = players
+	} else {
+		// Create default players if none provided
+		players := utils.GenerateDefaultPlayers(team.ID)
+		for i := range players {
+			if err := tx.Create(&players[i]).Error; err != nil {
+				tx.Rollback()
+				log.Printf("❌ [CreateTeam] Failed to create default player %d: %v", i, err)
+				errorResponse(c, http.StatusInternalServerError, "Failed to create default players")
+				return
+			}
+		}
+		team.Players = players
 	}
 
 	if err := tx.Commit().Error; err != nil {
@@ -429,8 +492,6 @@ func CreateTeam(c *gin.Context) {
 		errorResponse(c, http.StatusInternalServerError, "Failed to create team")
 		return
 	}
-
-	team.Players = players
 
 	success(c, team)
 }
@@ -741,44 +802,103 @@ func GenerateMatches(c *gin.Context) {
 func UpdateConfig(c *gin.Context) {
 	db := database.GetDB()
 
-	var updates models.SiteConfig
-	if err := c.ShouldBindJSON(&updates); err != nil {
-		errorResponse(c, http.StatusBadRequest, "Invalid config data")
-		return
-	}
-
 	var config models.SiteConfig
 	if err := db.First(&config).Error; err != nil {
 		errorResponse(c, http.StatusInternalServerError, "Failed to fetch config")
 		return
 	}
 
-	// Update fields
-	if updates.Title != "" {
-		config.Title = updates.Title
+	contentType := c.GetHeader("Content-Type")
+	log.Printf("ℹ️ [UpdateConfig] Content-Type: %s", contentType)
+
+	if contentType == "application/json" {
+		var updates models.SiteConfig
+		if err := c.ShouldBindJSON(&updates); err != nil {
+			errorResponse(c, http.StatusBadRequest, "Invalid config data")
+			return
+		}
+		// Update fields from JSON
+		if updates.Title != "" {
+			config.Title = updates.Title
+		}
+		if updates.Subtitle != "" {
+			config.Subtitle = updates.Subtitle
+		}
+		if updates.HeroSubtitle != "" {
+			config.HeroSubtitle = updates.HeroSubtitle
+		}
+		if updates.HeroTitle1 != "" {
+			config.HeroTitle1 = updates.HeroTitle1
+		}
+		if updates.HeroTitle2 != "" {
+			config.HeroTitle2 = updates.HeroTitle2
+		}
+		if updates.HeroTitle3 != "" {
+			config.HeroTitle3 = updates.HeroTitle3
+		}
+		if updates.MatchStage != "" {
+			config.MatchStage = updates.MatchStage
+		}
+		if updates.FeaturedMatchID != "" {
+			config.FeaturedMatchID = updates.FeaturedMatchID
+		}
+		config.AutoUpdateMatches = updates.AutoUpdateMatches
+
+	} else {
+		// Handle Multipart Form (for Logo Upload)
+		if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+			errorResponse(c, http.StatusBadRequest, "Failed to parse form data")
+			return
+		}
+
+		if val := c.PostForm("title"); val != "" {
+			config.Title = val
+		}
+		if val := c.PostForm("subtitle"); val != "" {
+			config.Subtitle = val
+		}
+		if val := c.PostForm("heroSubtitle"); val != "" {
+			config.HeroSubtitle = val
+		}
+		if val := c.PostForm("heroTitle1"); val != "" {
+			config.HeroTitle1 = val
+		}
+		if val := c.PostForm("heroTitle2"); val != "" {
+			config.HeroTitle2 = val
+		}
+		if val := c.PostForm("heroTitle3"); val != "" {
+			config.HeroTitle3 = val
+		}
+		if val := c.PostForm("matchStage"); val != "" {
+			config.MatchStage = val
+		}
+		if val := c.PostForm("featuredMatchId"); val != "" {
+			config.FeaturedMatchID = val
+		}
+		if val := c.PostForm("autoUpdateMatches"); val != "" {
+			config.AutoUpdateMatches = val == "true"
+		}
+
+		// Handle Logo File
+		file, err := c.FormFile("logo")
+		if err == nil {
+			// Ensure uploads directory exists
+			uploadDir := "./uploads"
+			if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+				os.Mkdir(uploadDir, 0755)
+			}
+
+			// Save file
+			filename := fmt.Sprintf("logo_%s_%s", uuid.New().String()[:8], filepath.Base(file.Filename))
+			filepath := filepath.Join(uploadDir, filename)
+			if err := c.SaveUploadedFile(file, filepath); err != nil {
+				log.Printf("❌ [UpdateConfig] Failed to save logo: %v", err)
+				errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
+				return
+			}
+			config.LogoPath = "/uploads/" + filename
+		}
 	}
-	if updates.Subtitle != "" {
-		config.Subtitle = updates.Subtitle
-	}
-	if updates.HeroSubtitle != "" {
-		config.HeroSubtitle = updates.HeroSubtitle
-	}
-	if updates.HeroTitle1 != "" {
-		config.HeroTitle1 = updates.HeroTitle1
-	}
-	if updates.HeroTitle2 != "" {
-		config.HeroTitle2 = updates.HeroTitle2
-	}
-	if updates.HeroTitle3 != "" {
-		config.HeroTitle3 = updates.HeroTitle3
-	}
-	if updates.MatchStage != "" {
-		config.MatchStage = updates.MatchStage
-	}
-	if updates.FeaturedMatchID != "" {
-		config.FeaturedMatchID = updates.FeaturedMatchID
-	}
-	config.AutoUpdateMatches = updates.AutoUpdateMatches
 
 	if err := db.Save(&config).Error; err != nil {
 		errorResponse(c, http.StatusInternalServerError, "Failed to update config")

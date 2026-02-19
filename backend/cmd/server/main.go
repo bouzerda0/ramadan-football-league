@@ -75,11 +75,21 @@ func main() {
 			protected.PUT("/matches/:id", handlers.UpdateMatch)
 			protected.DELETE("/matches/:id", handlers.DeleteMatch)
 
-			protected.POST("/config", handlers.UpdateConfig)
+			protected.PUT("/config", handlers.UpdateConfig)
 			protected.POST("/matches/generate", handlers.GenerateMatches)
 			protected.POST("/teams/generate", handlers.GenerateTeams)
 			protected.POST("/matches/:id/score", handlers.UpdateMatchScore)
 			protected.POST("/reset/matches", handlers.ResetMatches)
+
+			// Team Management
+			protected.POST("/teams", handlers.CreateTeam)
+			protected.PUT("/teams/:id", handlers.UpdateTeam)
+			protected.DELETE("/teams/:id", handlers.DeleteTeam)
+
+			// Player Management
+			protected.POST("/players", handlers.CreatePlayer)
+			protected.PUT("/players/:id", handlers.UpdatePlayer)
+			protected.DELETE("/players/:id", handlers.DeletePlayer)
 		}
 	}
 

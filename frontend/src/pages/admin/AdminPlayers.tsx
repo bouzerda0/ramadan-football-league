@@ -72,11 +72,10 @@ export default function AdminPlayers() {
 
     const handleUpdatePlayer = async (teamId: string, playerId: string) => {
         try {
-            const response = await fetch(`${API_URL}/api/admin/players`, {
+            const response = await fetch(`${API_URL}/api/admin/players/${playerId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: playerId,
                     teamId,
                     ...editValues,
                 }),

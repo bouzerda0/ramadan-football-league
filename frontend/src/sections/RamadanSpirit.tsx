@@ -19,8 +19,8 @@ export default function RamadanSpirit() {
         const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
         const mappedTeams: Team[] = data.map((t, index) => ({
           id: t.id,
-          name: t.teamName,
-          shortName: t.teamName ? t.teamName.substring(0, 3).toUpperCase() : 'UNK',
+          name: t.name,
+          shortName: t.name ? t.name.substring(0, 3).toUpperCase() : 'UNK',
           logo: t.logoPath || '',
           cohort: 'Cohort ' + String.fromCharCode(65 + index),
           captain: t.captainName,

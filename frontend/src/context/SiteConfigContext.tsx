@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+
 import { API_URL } from '@/lib/api';
+import { getAssetUrl } from '@/lib/utils';
 
 export type SiteConfig = {
     title: string;
@@ -53,6 +55,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             if (res.ok) {
                 const json = await res.json();
                 const data = json.data || json;
+                console.log("ℹ️ [SiteConfigContext] Fetched config:", data);
                 setConfig({
                     title: data.title || defaultConfig.title,
                     subtitle: data.subtitle || defaultConfig.subtitle,
@@ -60,7 +63,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                     heroTitle1: data.heroTitle1 || defaultConfig.heroTitle1,
                     heroTitle2: data.heroTitle2 || defaultConfig.heroTitle2,
                     heroTitle3: data.heroTitle3 || defaultConfig.heroTitle3,
-                    logoPath: data.logoPath || '',
+                    logoPath: getAssetUrl(data.logoPath),
                     autoUpdateMatches: data.autoUpdateMatches !== undefined ? data.autoUpdateMatches : defaultConfig.autoUpdateMatches,
                     featuredMatchId: data.featuredMatchId || defaultConfig.featuredMatchId,
                     matchStage: data.matchStage || defaultConfig.matchStage,
