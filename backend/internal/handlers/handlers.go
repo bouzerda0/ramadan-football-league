@@ -983,3 +983,163 @@ func AdminMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// ============ Moments Handlers ============
+
+// UploadMoment handles photo uploads
+func UploadMoment(c *gin.Context) {
+	// 1. Parse File
+	file, err := c.FormFile("image")
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, "No image uploaded")
+		return
+	}
+
+	// 2. Save File
+	// Ensure uploads directory exists
+	uploadDir := "./uploads/moments"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to create upload directory")
+		return
+	}
+
+	// Generate unique filename
+	ext := filepath.Ext(file.Filename)
+	filename := uuid.New().String() + ext
+	savePath := filepath.Join(uploadDir, filename)
+
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to save image")
+		return
+	}
+
+	// 3. Create DB Record
+	caption := c.PostForm("caption")
+	db := database.GetDB()
+
+	moment := models.Moment{
+		ImageURL: "/uploads/moments/" + filename,
+		Caption:  caption,
+		Status:   "pending",
+	}
+
+	if err := db.Create(&moment).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to save moment info")
+		return
+	}
+
+	success(c, moment)
+}
+
+// GetMoments returns approved moments for public view
+func GetMoments(c *gin.Context) {
+	db := database.GetDB()
+	var moments []models.Moment
+	if err := db.Where("status = ?", "approved").Order("created_at desc").Find(&moments).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to fetch moments")
+		return
+	}
+	success(c, moments)
+}
+
+// GetAdminMoments returns all moments for admin view
+func GetAdminMoments(c *gin.Context) {
+	db := database.GetDB()
+	var moments []models.Moment
+	if err := db.Order("created_at desc").Find(&moments).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to fetch moments")
+		return
+	}
+	success(c, moments)
+}
+
+// UpdateMomentStatus updates the status of a moment
+func UpdateMomentStatus(c *gin.Context) {
+	id := c.Param("id")
+	var input struct {
+		Status string `json:"status" binding:"required,oneof=approved rejected pending"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		errorResponse(c, http.StatusBadRequest, "Invalid status")
+		return
+	}
+
+	db := database.GetDB()
+	var moment models.Moment
+	if err := db.First(&moment, "id = ?", id).Error; err != nil {
+		errorResponse(c, http.StatusNotFound, "Moment not found")
+		return
+	}
+
+	moment.Status = input.Status
+	if err := db.Save(&moment).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to update status")
+		return
+	}
+
+	success(c, moment)
+}
+
+// AdminUploadMoment handles photo uploads by admin (auto-approved)
+func AdminUploadMoment(c *gin.Context) {
+	// 1. Parse File
+	file, err := c.FormFile("image")
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, "No image uploaded")
+		return
+	}
+
+	// 2. Save File
+	uploadDir := "./uploads/moments"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to create upload directory")
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	filename := uuid.New().String() + ext
+	savePath := filepath.Join(uploadDir, filename)
+
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to save image")
+		return
+	}
+
+	// 3. Create DB Record (Status = approved)
+	caption := c.PostForm("caption")
+	if caption == "" {
+		caption = c.PostForm("title")
+	}
+
+	db := database.GetDB()
+
+	moment := models.Moment{
+		ImageURL: "/uploads/moments/" + filename,
+		Caption:  caption,
+		Status:   "approved", // Admin uploads are auto-approved
+	}
+
+	if err := db.Create(&moment).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to save moment info")
+		return
+	}
+
+	success(c, moment)
+}
+
+// DeleteMoment deletes a moment
+func DeleteMoment(c *gin.Context) {
+	id := c.Param("id")
+	db := database.GetDB()
+
+	// Optional: Delete file from disk (omitted for safety/simplicity, but good practice)
+	// For now just delete DB record
+
+	if err := db.Where("id = ?", id).Delete(&models.Moment{}).Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to delete moment")
+		return
+	}
+
+	success(c, gin.H{"message": "Moment deleted successfully"})
+}

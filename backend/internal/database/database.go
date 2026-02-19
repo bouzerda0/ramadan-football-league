@@ -77,6 +77,7 @@ func migrate() error {
 		&models.Match{},
 		&models.MatchEvent{},
 		&models.SiteConfig{},
+		&models.Moment{},
 	)
 }
 
@@ -87,9 +88,9 @@ func seed() error {
 	DB.Model(&models.SiteConfig{}).Count(&configCount)
 	if configCount == 0 {
 		defaultConfig := models.SiteConfig{
-			Title:             "UMPO League",
+			Title:             "Zone 0 League",
 			Subtitle:          "RFL 2026",
-			HeroSubtitle:      "UMPO • High School Tournament 2026",
+			HeroSubtitle:      "Zone 0 • High School Tournament 2026",
 			HeroTitle1:        "RAMADAN",
 			HeroTitle2:        "FOOTBALL",
 			HeroTitle3:        "LEAGUE",

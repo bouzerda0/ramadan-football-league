@@ -1,56 +1,87 @@
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Camera, ImageIcon } from 'lucide-react';
+import { API_URL } from '@/lib/api';
+
+interface Moment {
+  id: string;
+  imageUrl?: string;
+  caption: string;
+  createdAt: string;
+  isDefault?: boolean;
+}
+
+const DEFAULT_MOMENTS: Moment[] = [
+  {
+    id: 'default-1',
+    caption: 'Opening Match Ceremony',
+    createdAt: new Date().toISOString(),
+    isDefault: true
+  },
+  {
+    id: 'default-2',
+    caption: 'Epic Goal Celebration',
+    createdAt: new Date().toISOString(),
+    isDefault: true
+  },
+  {
+    id: 'default-3',
+    caption: 'Team Huddle',
+    createdAt: new Date().toISOString(),
+    isDefault: true
+  },
+  {
+    id: 'default-4',
+    caption: 'Fan Support',
+    createdAt: new Date().toISOString(),
+    isDefault: true
+  }
+];
 
 export default function Gallery() {
   const { t, dir } = useLanguage();
   const { ref, isVisible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
+  const [moments, setMoments] = useState<Moment[]>([]);
 
-  // Placeholder gallery items - in production these would be actual images
-  const galleryItems = [
-    {
-      id: 1,
-      title: 'Opening Match Ceremony',
-      date: 'March 28, 2026',
-      description: 'The tournament kicks off with an exciting opening ceremony under the lights.',
-      color: '#D4A018'
-    },
-    {
-      id: 2,
-      title: 'Epic Goal Celebration',
-      date: 'March 30, 2026',
-      description: 'Al-Mountakhab celebrates a stunning late equalizer.',
-      color: '#10B981'
-    },
-    {
-      id: 3,
-      title: 'Sportsmanship Moment',
-      date: 'March 31, 2026',
-      description: 'Players from both teams shake hands after an intense match.',
-      color: '#3B82F6'
-    },
-    {
-      id: 4,
-      title: 'Night Pitch Atmosphere',
-      date: 'April 1, 2026',
-      description: 'The beautiful lights of UMPO pitch at night.',
-      color: '#8B5CF6'
-    },
-    {
-      id: 5,
-      title: 'Team Huddle',
-      date: 'March 29, 2026',
-      description: 'Les Aigles strategizing before their crucial match.',
-      color: '#EF4444'
-    },
-    {
-      id: 6,
-      title: 'Fan Support',
-      date: 'April 2, 2026',
-      description: 'Amazing crowd support from all cohorts.',
-      color: '#F59E0B'
-    },
-  ];
+  useEffect(() => {
+    fetchMoments();
+  }, []);
+
+  const fetchMoments = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/moments`);
+      if (response.ok) {
+        const json = await response.json();
+        const fetchedMoments: Moment[] = json.data || [];
+
+        // Merge strategy:
+        // 1. Start with fetched moments
+        // 2. Fill remaining slots up to 4 with default moments
+        const displayMoments = [...fetchedMoments];
+        if (displayMoments.length < 4) {
+          const defaultsNeeded = 4 - displayMoments.length;
+          displayMoments.push(...DEFAULT_MOMENTS.slice(0, defaultsNeeded));
+        }
+
+        setMoments(displayMoments);
+      } else {
+        // Fallback if API fails
+        setMoments(DEFAULT_MOMENTS);
+      }
+    } catch (error) {
+      console.error('Failed to fetch moments:', error);
+      setMoments(DEFAULT_MOMENTS);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
     <section
@@ -83,45 +114,48 @@ export default function Gallery() {
           </div>
 
           {/* Gallery Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {galleryItems.map((item, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {moments.map((item, index) => (
               <div
                 key={item.id}
                 className={`group relative overflow-hidden rounded-2xl bg-[#141B2D] card-hover transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                   }`}
                 style={{ transitionDelay: `${200 + index * 100}ms` }}
               >
-                {/* Image Placeholder */}
-                <div
-                  className="aspect-[4/3] relative overflow-hidden"
-                  style={{ backgroundColor: `${item.color}15` }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: `${item.color}30` }}
-                    >
-                      <ImageIcon className="w-10 h-10" style={{ color: item.color }} />
+                {/* Image or Placeholder */}
+                <div className="aspect-[4/3] relative overflow-hidden bg-[#141B2D] flex items-center justify-center">
+                  {item.imageUrl ? (
+                    <img
+                      src={`${API_URL}${item.imageUrl}`}
+                      alt={item.caption}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://placehold.co/600x400/141B2D/D4A018?text=No+Image';
+                      }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-[#D4A018]/30 group-hover:text-[#D4A018] transition-colors">
+                      <ImageIcon className="w-12 h-12 mb-2" />
                     </div>
-                  </div>
+                  )}
 
                   {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F1C] via-transparent to-transparent opacity-60" />
 
                   {/* Date Badge */}
                   <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[#0B0F1C]/80 backdrop-blur-sm">
-                    <span className="text-xs text-[#F4F6FA]">{item.date}</span>
+                    <span className="text-xs text-[#F4F6FA]">{formatDate(item.createdAt)}</span>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-6">
-                  <h3 className="text-lg font-display font-bold text-[#F4F6FA] mb-2 group-hover:text-[#D4A018] transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-[#A9B3C7] line-clamp-2">
-                    {item.description}
+                  <p className="text-sm font-medium text-[#F4F6FA] line-clamp-2">
+                    {item.caption}
                   </p>
+                  {item.isDefault && (
+                    <p className="text-xs text-[#A9B3C7] mt-2 italic">Coming soon</p>
+                  )}
                 </div>
 
                 {/* Border Effect */}
@@ -130,18 +164,6 @@ export default function Gallery() {
                 />
               </div>
             ))}
-          </div>
-
-          {/* Upload CTA */}
-          <div
-            className={`mt-12 text-center transition-all duration-700 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-          >
-            <p className="text-[#A9B3C7] mb-4">Have photos from the matches?</p>
-            <button className="btn-secondary inline-flex items-center gap-2">
-              <Camera className="w-4 h-4" />
-              Upload Your Photos
-            </button>
           </div>
         </div>
       </div>

@@ -23,6 +23,7 @@ export default function AdminLayout() {
                             { path: '/admin/teams', label: 'Teams' },
                             { path: '/admin/players', label: 'Players' },
                             { path: '/admin/matches', label: 'Matches' },
+                            { path: '/admin/moments', label: 'Moments' },
                             { path: '/admin/settings', label: 'Settings' },
                         ].map(link => (
                             <Link

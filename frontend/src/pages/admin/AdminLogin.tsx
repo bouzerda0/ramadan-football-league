@@ -50,7 +50,7 @@ export default function AdminLogin() {
                         <Lock className="w-8 h-8 text-[#D4A018]" />
                     </div>
                     <h1 className="text-2xl font-bold text-[#F4F6FA]">Admin Login</h1>
-                    <p className="text-[#A9B3C7]">UMPO Football League</p>
+                    <p className="text-[#A9B3C7]">Zone 0 Football League</p>
                 </div>
 
                 {error && (

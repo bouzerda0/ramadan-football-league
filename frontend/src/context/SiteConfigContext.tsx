@@ -24,9 +24,9 @@ type SiteConfigContextType = {
 };
 
 const defaultConfig: SiteConfig = {
-    title: 'UMPO',
+    title: 'Zone 0',
     subtitle: 'RFL 2026',
-    heroSubtitle: 'UMPO • School Tournament 2026',
+    heroSubtitle: 'Zone 0 • School Tournament 2026',
     heroTitle1: 'RAMADAN',
     heroTitle2: 'FOOTBALL',
     heroTitle3: 'LEAGUE',
@@ -56,6 +56,10 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 const json = await res.json();
                 const data = json.data || json;
                 console.log("ℹ️ [SiteConfigContext] Fetched config:", data);
+                // Update document title
+                if (data.title) {
+                    document.title = `${data.title} - ${data.subtitle || ''}`;
+                }
                 setConfig({
                     title: data.title || defaultConfig.title,
                     subtitle: data.subtitle || defaultConfig.subtitle,

@@ -323,3 +323,20 @@ type APIResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 	Error   string      `json:"error,omitempty"`
 }
+
+// Moment represents a user-uploaded photo
+type Moment struct {
+	ID        string    `json:"id" gorm:"primaryKey"`
+	ImageURL  string    `json:"imageUrl"`
+	Caption   string    `json:"caption"`
+	Status    string    `json:"status" gorm:"default:'pending'"` // pending, approved, rejected
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// BeforeCreate generates UUID before creating a moment
+func (m *Moment) BeforeCreate(tx *gorm.DB) error {
+	if m.ID == "" {
+		m.ID = "moment_" + uuid.New().String()[:8]
+	}
+	return nil
+}

@@ -1,4 +1,4 @@
-# UMPO - Ramadan Football League 2026
+# Zone 0 - Ramadan Football League 2026
 
 This project consists of a **Go backend** (API & Static File Server) and a **React frontend** (Single Page Application).
 

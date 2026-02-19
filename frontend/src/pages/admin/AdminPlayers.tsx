@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '@/lib/api';
-import { Save, Search, TrendingUp, Shield, User, X } from 'lucide-react';
+import { Save, Search, TrendingUp, Shield, User, X, Plus } from 'lucide-react';
 
 interface Player {
     id: string;
@@ -45,6 +45,14 @@ export default function AdminPlayers() {
     const [editingPlayer, setEditingPlayer] = useState<{ teamId: string; playerId: string } | null>(null);
     const [editValues, setEditValues] = useState<Partial<Player>>({});
 
+    // New state for creating player
+    const [isCreating, setIsCreating] = useState(false);
+    const [newPlayer, setNewPlayer] = useState<{ name: string; number: number; position: string }>({
+        name: '',
+        number: 0,
+        position: 'MID',
+    });
+
     useEffect(() => {
         fetchTeams();
     }, []);
@@ -67,6 +75,34 @@ export default function AdminPlayers() {
             console.error('Error fetching teams:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreatePlayer = async () => {
+        if (!selectedTeamId || !newPlayer.name) return;
+
+        try {
+            const response = await fetch(`${API_URL}/api/admin/players`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    teamId: selectedTeamId,
+                    name: newPlayer.name,
+                    number: newPlayer.number,
+                    position: newPlayer.position,
+                }),
+            });
+
+            if (response.ok) {
+                await fetchTeams();
+                setIsCreating(false);
+                setNewPlayer({ name: '', number: 0, position: 'MID' });
+            } else {
+                alert('Failed to create player');
+            }
+        } catch (error) {
+            console.error('Failed to create player:', error);
+            alert('Error creating player');
         }
     };
 
@@ -253,7 +289,77 @@ export default function AdminPlayers() {
                         <span className="text-[#D4A018]">{selectedTeam?.name}</span> Players
                     </h2>
                 </div>
+                <button
+                    onClick={() => setIsCreating(true)}
+                    className="bg-[#D4A018] text-[#0B0F1C] px-4 py-2 rounded-lg font-bold hover:bg-[#B38612] transition-colors flex items-center gap-2"
+                >
+                    <Plus className="w-5 h-5" />
+                    New Player
+                </button>
             </div>
+
+            {/* Create Player Modal */}
+            {isCreating && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#141B2D] p-6 rounded-xl border border-[#D4A018]/20 w-full max-w-md">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-[#F4F6FA]">Add New Player</h3>
+                            <button onClick={() => setIsCreating(false)} className="text-[#A9B3C7] hover:text-[#F4F6FA]">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-[#A9B3C7] mb-1">Name</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-[#0B0F1C] p-3 rounded border border-[#D4A018]/20 text-[#F4F6FA]"
+                                    value={newPlayer.name}
+                                    onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+                                    placeholder="Player Name"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[#A9B3C7] mb-1">Number</label>
+                                    <input
+                                        type="number"
+                                        className="w-full bg-[#0B0F1C] p-3 rounded border border-[#D4A018]/20 text-[#F4F6FA]"
+                                        value={newPlayer.number}
+                                        onChange={(e) => setNewPlayer({ ...newPlayer, number: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[#A9B3C7] mb-1">Position</label>
+                                    <select
+                                        className="w-full bg-[#0B0F1C] p-3 rounded border border-[#D4A018]/20 text-[#F4F6FA]"
+                                        value={newPlayer.position}
+                                        onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+                                    >
+                                        {POSITIONS.map(pos => (
+                                            <option key={pos} value={pos}>{POSITION_LABELS[pos]}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    onClick={() => setIsCreating(false)}
+                                    className="px-4 py-2 rounded text-[#A9B3C7] hover:bg-[#0B0F1C] transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleCreatePlayer}
+                                    className="px-4 py-2 bg-[#D4A018] text-[#0B0F1C] rounded font-bold hover:bg-[#B38612] transition-colors"
+                                >
+                                    Create Player
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Existing Filters (modified to remove team filter) */}
             <div className="bg-[#141B2D] p-4 rounded-xl border border-[#D4A018]/10">

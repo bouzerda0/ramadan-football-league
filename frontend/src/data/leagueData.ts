@@ -1,4 +1,4 @@
-// UMPO Ramadan Football League 2026 - Data
+// Zone 0 Ramadan Football League 2026 - Data
 // This file now serves as a fallback/initial state. Real data comes from the API.
 
 import type { Team, Match, Player, PrayerTimes, WeatherData } from '@/types';

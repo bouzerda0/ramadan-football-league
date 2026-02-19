@@ -18,7 +18,7 @@ export default function Registration() {
   const contactInfo = [
     { icon: <Mail className="w-4 h-4" />, text: 'zone01.oujda@school.edu.ma' },
     { icon: <Phone className="w-4 h-4" />, text: '+212 536 00 00 00' },
-    { icon: <MapPin className="w-4 h-4" />, text: 'UMPO, Oujda, Morocco' },
+    { icon: <MapPin className="w-4 h-4" />, text: 'Zone 0, Oujda, Morocco' },
   ];
 
   return (
@@ -87,7 +87,7 @@ export default function Registration() {
                     <Trophy className="w-5 h-5 text-[#0B0F1C]" />
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-[#F4F6FA]">UMPO</h3>
+                    <h3 className="font-display font-bold text-[#F4F6FA]">Zone 0</h3>
                     <p className="text-xs text-[#6B7280]">Ramadan Football League 2026</p>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export default function Registration() {
               <div className="flex items-center gap-4">
                 <span className="text-xs text-[#6B7280]">Made with</span>
                 <span className="text-[#D4A018]">♥</span>
-                <span className="text-xs text-[#6B7280]">for UMPO</span>
+                <span className="text-xs text-[#6B7280]">for Zone 0</span>
               </div>
             </div>
           </footer>

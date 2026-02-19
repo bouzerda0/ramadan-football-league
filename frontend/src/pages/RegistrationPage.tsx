@@ -98,7 +98,7 @@ export default function RegistrationPage() {
                     <h1 className="text-4xl md:text-5xl font-bold font-display text-[#F4F6FA] mb-4">
                         <span className="text-[#D4A018]">Team</span> Registration
                     </h1>
-                    <p className="text-[#A9B3C7]">Register your team for the UMPO Ramadan League 2026</p>
+                    <p className="text-[#A9B3C7]">Register your team for the Zone 0 Ramadan League 2026</p>
                 </div>
 
                 <div className="bg-[#141B2D]/50 border border-[#D4A018]/20 rounded-2xl p-6 md:p-10 backdrop-blur-sm">

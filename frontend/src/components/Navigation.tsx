@@ -77,11 +77,11 @@ export default function Navigation() {
                   <Trophy className="w-5 h-5 md:w-6 md:h-6 text-[var(--rl-navy)]" />
                 )}
               </div>
-              <div className="text-left hidden sm:block">
-                <span className="font-display font-black text-white text-lg tracking-tight uppercase leading-none block group-hover:text-[var(--rl-gold)] transition-colors">
+              <div className="text-left block ml-1 md:ml-0">
+                <span className="font-display font-black text-white text-sm sm:text-lg tracking-tight uppercase leading-none block group-hover:text-[var(--rl-gold)] transition-colors">
                   {config.title}
                 </span>
-                <span className="block text-[10px] font-bold text-[var(--rl-gold)] tracking-widest uppercase mt-0.5">{config.subtitle}</span>
+                <span className="block text-[8px] sm:text-[10px] font-bold text-[var(--rl-gold)] tracking-widest uppercase mt-0.5">{config.subtitle}</span>
               </div>
             </button>
 

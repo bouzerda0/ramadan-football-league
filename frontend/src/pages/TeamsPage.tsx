@@ -72,7 +72,7 @@ export default function TeamsPage() {
                     <h1 className="text-4xl md:text-5xl font-bold font-display text-[#F4F6FA] mb-4">
                         <span className="text-[#D4A018]">Registered</span> Teams
                     </h1>
-                    <p className="text-[#A9B3C7]">Meet the challengers of the UMPO Ramadan League 2026</p>
+                    <p className="text-[#A9B3C7]">Meet the challengers of the Zone 0 Ramadan League 2026</p>
                 </div>
 
                 {/* Search */}
