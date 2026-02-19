@@ -41,7 +41,7 @@ func GetStatus(c *gin.Context) {
 	success(c, gin.H{
 		"status":  "ok",
 		"message": "Ramadan Football League API is running",
-		"version": "2.0.0",
+		"version": "4.0.0",
 	})
 }
 
@@ -537,30 +537,71 @@ func UpdateTeam(c *gin.Context) {
 	success(c, team)
 }
 
-// DeleteTeam deletes a team
+// DeleteTeam deletes a team and all associated data
 func DeleteTeam(c *gin.Context) {
 	db := database.GetDB()
 	id := c.Param("id")
 
-	// Check if team has matches
-	var matchCount int64
-	db.Model(&models.Match{}).Where("home_team_id = ? OR away_team_id = ?", id, id).Count(&matchCount)
-	if matchCount > 0 {
-		errorResponse(c, http.StatusBadRequest, "Cannot delete team with existing matches")
+	// Start transaction
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if tx.Error != nil {
+		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
 
-	if err := db.Where("team_id = ?", id).Delete(&models.Player{}).Error; err != nil {
+	// 1. Find matches to delete (where team is home or away)
+	var matchIDs []string
+	if err := tx.Model(&models.Match{}).
+		Where("home_team_id = ? OR away_team_id = ?", id, id).
+		Pluck("id", &matchIDs).Error; err != nil {
+		tx.Rollback()
+		errorResponse(c, http.StatusInternalServerError, "Failed to fetch associated matches")
+		return
+	}
+
+	// 2. Delete Match Events for those matches
+	if len(matchIDs) > 0 {
+		if err := tx.Where("match_id IN ?", matchIDs).Delete(&models.MatchEvent{}).Error; err != nil {
+			tx.Rollback()
+			errorResponse(c, http.StatusInternalServerError, "Failed to delete match events")
+			return
+		}
+
+		// 3. Delete Matches
+		if err := tx.Where("id IN ?", matchIDs).Delete(&models.Match{}).Error; err != nil {
+			tx.Rollback()
+			errorResponse(c, http.StatusInternalServerError, "Failed to delete matches")
+			return
+		}
+	}
+
+	// 4. Delete Players
+	if err := tx.Where("team_id = ?", id).Delete(&models.Player{}).Error; err != nil {
+		tx.Rollback()
 		errorResponse(c, http.StatusInternalServerError, "Failed to delete players")
 		return
 	}
 
-	if err := db.Where("id = ?", id).Delete(&models.Team{}).Error; err != nil {
+	// 5. Delete Team
+	if err := tx.Where("id = ?", id).Delete(&models.Team{}).Error; err != nil {
+		tx.Rollback()
 		errorResponse(c, http.StatusInternalServerError, "Failed to delete team")
 		return
 	}
 
-	success(c, gin.H{"message": "Team deleted successfully"})
+	// Commit
+	if err := tx.Commit().Error; err != nil {
+		errorResponse(c, http.StatusInternalServerError, "Failed to commit transaction")
+		return
+	}
+
+	success(c, gin.H{"message": "Team and all associated data deleted successfully"})
 }
 
 // GenerateTeams generates teams with generic names
@@ -890,13 +931,14 @@ func UpdateConfig(c *gin.Context) {
 
 			// Save file
 			filename := fmt.Sprintf("logo_%s_%s", uuid.New().String()[:8], filepath.Base(file.Filename))
-			filepath := filepath.Join(uploadDir, filename)
-			if err := c.SaveUploadedFile(file, filepath); err != nil {
+			savePath := filepath.Join(uploadDir, filename)
+			if err := c.SaveUploadedFile(file, savePath); err != nil {
 				log.Printf("❌ [UpdateConfig] Failed to save logo: %v", err)
 				errorResponse(c, http.StatusInternalServerError, "Failed to save logo")
 				return
 			}
 			config.LogoPath = "/uploads/" + filename
+			log.Printf("✅ [UpdateConfig] Logo saved to: %s", config.LogoPath)
 		}
 	}
 

@@ -179,39 +179,45 @@ export default function MatchOfTheDay() {
 
               <div className="relative flex flex-col items-center">
 
-                {/* Teams Layout */}
-                <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-12 items-center mb-12">
+                {/* Teams Layout - Forced Horizontal */}
+                <div className="w-full flex flex-row items-center justify-between gap-2 sm:gap-6 md:gap-12 mb-8 md:mb-12">
 
                   {/* Home Team */}
-                  <div className="flex flex-col items-center justify-center text-center group">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-[var(--rl-navy-light)] border border-[var(--rl-gold)]/30 flex items-center justify-center p-6 shadow-2xl mb-6 group-hover:shadow-[0_0_30px_var(--rl-gold)]/20 transition-all duration-500">
+                  <div className="flex-1 flex flex-col items-center justify-center text-center group min-w-0">
+                    <div className="relative w-16 h-16 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl sm:rounded-3xl bg-[var(--rl-navy-light)] border border-[var(--rl-gold)]/30 flex items-center justify-center p-2 sm:p-6 shadow-xl mb-2 sm:mb-6 group-hover:shadow-[0_0_30px_var(--rl-gold)]/20 transition-all duration-500">
                       {match.home?.logoPath ? (
                         <img src={match.home.logoPath} alt={match.home.teamName} className="w-full h-full object-contain filter drop-shadow-lg" />
                       ) : (
-                        <span className="text-4xl font-black text-[var(--rl-gold)]">{match.home?.shortName}</span>
+                        <span className="text-xl sm:text-4xl font-black text-[var(--rl-gold)]">{match.home?.shortName}</span>
                       )}
                     </div>
-                    <h3 className="text-2xl md:text-3xl font-display font-black text-white mb-2">{match.home?.teamName}</h3>
-                    <div className="badge px-3 py-1 rounded-full bg-[var(--rl-gold)]/10 text-[var(--rl-gold)] text-xs font-bold uppercase tracking-wider border border-[var(--rl-gold)]/20">
+                    <h3 className="text-xs sm:text-2xl md:text-3xl font-display font-black text-white mb-1 sm:mb-2 truncate w-full px-1">{match.home?.teamName}</h3>
+                    <div className="badge px-1.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[var(--rl-gold)]/10 text-[var(--rl-gold)] text-[8px] sm:text-xs font-bold uppercase tracking-wider border border-[var(--rl-gold)]/20 truncate max-w-full">
                       {match.home?.cohort}
                     </div>
                   </div>
 
                   {/* VS / Info */}
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="relative mb-8">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--rl-gold)] to-[var(--rl-gold-dark)] flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.4)] z-10 relative">
-                        <span className="text-3xl font-display font-black text-[var(--rl-navy)]">VS</span>
+                  <div className="flex flex-col items-center justify-center shrink-0">
+                    <div className="relative mb-2 sm:mb-8">
+                      <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[var(--rl-gold)] to-[var(--rl-gold-dark)] flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.4)] z-10 relative">
+                        <span className="text-sm sm:text-3xl font-display font-black text-[var(--rl-navy)]">VS</span>
                       </div>
                       <div className="absolute inset-0 rounded-full bg-[var(--rl-gold)] animate-ping opacity-20" />
                     </div>
 
-                    <div className="flex flex-col gap-3 w-full">
-                      <div className="flex items-center justify-center gap-2 text-[var(--rl-gray)] bg-[var(--rl-navy-light)]/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
+                    <div className="flex flex-col gap-1 sm:gap-3 w-full scale-75 sm:scale-100 origin-center">
+                      <div className="hidden sm:flex items-center justify-center gap-2 text-[var(--rl-gray)] bg-[var(--rl-navy-light)]/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
                         <Calendar className="w-4 h-4 text-[var(--rl-gold)]" />
                         <span className="font-mono text-sm">{match?.date}</span>
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-[var(--rl-gray)] bg-[var(--rl-navy-light)]/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
+                      {/* Mobile Date/Time Compact */}
+                      <div className="flex sm:hidden flex-col items-center text-[var(--rl-gray)] text-[8px]">
+                        <span>{match?.date}</span>
+                        <span>{match?.time}</span>
+                      </div>
+
+                      <div className="hidden sm:flex items-center justify-center gap-2 text-[var(--rl-gray)] bg-[var(--rl-navy-light)]/50 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/5">
                         <MapPin className="w-4 h-4 text-[var(--rl-emerald)]" />
                         <span className="font-mono text-sm">{match?.time} • {match?.venue}</span>
                       </div>
@@ -219,16 +225,16 @@ export default function MatchOfTheDay() {
                   </div>
 
                   {/* Away Team */}
-                  <div className="flex flex-col items-center justify-center text-center group">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-[var(--rl-navy-light)] border border-[var(--rl-emerald)]/30 flex items-center justify-center p-6 shadow-2xl mb-6 group-hover:shadow-[0_0_30px_var(--rl-emerald)]/20 transition-all duration-500">
+                  <div className="flex-1 flex flex-col items-center justify-center text-center group min-w-0">
+                    <div className="relative w-16 h-16 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl sm:rounded-3xl bg-[var(--rl-navy-light)] border border-[var(--rl-emerald)]/30 flex items-center justify-center p-2 sm:p-6 shadow-xl mb-2 sm:mb-6 group-hover:shadow-[0_0_30px_var(--rl-emerald)]/20 transition-all duration-500">
                       {match.away?.logoPath ? (
                         <img src={match.away.logoPath} alt={match.away.teamName} className="w-full h-full object-contain filter drop-shadow-lg" />
                       ) : (
-                        <span className="text-4xl font-black text-[var(--rl-emerald)]">{match.away?.shortName}</span>
+                        <span className="text-xl sm:text-4xl font-black text-[var(--rl-emerald)]">{match.away?.shortName}</span>
                       )}
                     </div>
-                    <h3 className="text-2xl md:text-3xl font-display font-black text-white mb-2">{match.away?.teamName}</h3>
-                    <div className="badge px-3 py-1 rounded-full bg-[var(--rl-emerald)]/10 text-[var(--rl-emerald)] text-xs font-bold uppercase tracking-wider border border-[var(--rl-emerald)]/20">
+                    <h3 className="text-xs sm:text-2xl md:text-3xl font-display font-black text-white mb-1 sm:mb-2 truncate w-full px-1">{match.away?.teamName}</h3>
+                    <div className="badge px-1.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[var(--rl-emerald)]/10 text-[var(--rl-emerald)] text-[8px] sm:text-xs font-bold uppercase tracking-wider border border-[var(--rl-emerald)]/20 truncate max-w-full">
                       {match.away?.cohort}
                     </div>
                   </div>

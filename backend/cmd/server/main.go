@@ -34,8 +34,12 @@ func main() {
 
 	// 4. CORS configuration (Fixed for 405 & Network Error)
 	config := cors.DefaultConfig()
-	// درنا true باش نهنيو راسنا من المشاكل، يقبل من أي بلاصة
-	config.AllowAllOrigins = true
+	// Allow specific origins for credentials support
+	config.AllowOrigins = []string{
+		"http://localhost:5173",
+		"http://localhost:5174", // Fallback if 5173 is busy
+		"http://127.0.0.1:5173",
+	}
 
 	// ضروري تزيد هاد Methods كاملين باش Preflight يدوز
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}

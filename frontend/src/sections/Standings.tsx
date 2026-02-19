@@ -35,37 +35,53 @@ export default function Standings() {
           throw new Error('Failed to fetch from Backend');
         }
 
-        const data: BackendTeam[] = await response.json();
+        const json = await response.json();
+        console.log("API Response:", json);
+
+        // Handle wrapped response { success: true, data: [...] }
+        const data: BackendTeam[] = Array.isArray(json) ? json : (json.data || []);
+
+        if (!Array.isArray(data)) {
+          console.error("Expected array but got:", data);
+          setTeams([]);
+          return;
+        }
 
         const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
 
-        const mappedTeams: Team[] = data.map((t, index) => ({
-          id: t.id,
-          name: t.name,
-          shortName: t.name.substring(0, 3).toUpperCase(),
-          logo: '',
-          cohort: `Group ${t.group}`,
-          captain: 'Unknown',
-          motto: '',
-          colors: {
-            primary: colors[index % colors.length],
-            secondary: '#F4F6FA'
-          },
-          squad: [],
-          stats: {
-            played: t.stats.played,
-            won: t.stats.won,
-            drawn: t.stats.drawn,
-            lost: t.stats.lost,
-            goalsFor: t.stats.gf,
-            goalsAgainst: t.stats.ga,
-            goalDifference: t.stats.gf - t.stats.ga,
-            points: t.stats.points,
-            form: [],
-            ramadanSpirit: 80 + Math.floor(Math.random() * 20)
-          },
-          qrCode: ''
-        }));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mappedTeams: Team[] = data.map((t: any, index) => {
+          // Robust stats extraction handling both flat and nested structures
+          const stats = t.stats || t;
+
+          return {
+            id: t.id,
+            name: t.name,
+            shortName: t.name ? t.name.substring(0, 3).toUpperCase() : 'UNK',
+            logo: '',
+            cohort: t.group ? `Group ${t.group}` : 'General',
+            captain: 'Unknown',
+            motto: '',
+            colors: {
+              primary: colors[index % colors.length],
+              secondary: '#F4F6FA'
+            },
+            squad: [],
+            stats: {
+              played: stats.played || 0,
+              won: stats.won || 0,
+              drawn: stats.drawn || 0,
+              lost: stats.lost || 0,
+              goalsFor: stats.goalsFor || stats.gf || 0,
+              goalsAgainst: stats.goalsAgainst || stats.ga || 0,
+              goalDifference: (stats.goalsFor || stats.gf || 0) - (stats.goalsAgainst || stats.ga || 0),
+              points: stats.points || 0,
+              form: [],
+              ramadanSpirit: 80 + Math.floor(Math.random() * 20)
+            },
+            qrCode: ''
+          };
+        });
 
         const sorted = mappedTeams.sort((a, b) => {
           if (b.stats.points !== a.stats.points) return b.stats.points - a.stats.points;

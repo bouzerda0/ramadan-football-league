@@ -170,7 +170,8 @@ export default function AdminTeams() {
                 setShowDeleteModal(false);
                 setSelectedTeam(null);
             } else {
-                alert('Failed to delete team');
+                const data = await response.json();
+                alert(data.error || 'Failed to delete team');
             }
         } catch (error) {
             console.error('Failed to delete team:', error);

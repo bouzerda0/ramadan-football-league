@@ -2,15 +2,18 @@ import { useEffect, useState, useRef } from 'react';
 import { API_URL } from '@/lib/api';
 import { getAssetUrl } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteConfig } from '@/context/SiteConfigContext'; // Import hook
 import { usePrayerTimes } from '@/hooks/usePrayerTimes';
 import { ChevronDown, Moon, Star, Trophy } from 'lucide-react';
 import type { Team } from '@/types';
 
 export default function Hero() {
   const { dir } = useLanguage();
+  const { config } = useSiteConfig(); // Get config
   const { timeToIftar } = usePrayerTimes();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  // Start loaded to ensure visibility even if fetch fails/delays
+  const [isLoaded, setIsLoaded] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -21,6 +24,7 @@ export default function Hero() {
           const json = await res.json();
           const data = Array.isArray(json) ? json : (json.data || []);
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedTeams = data.map((t: any) => ({
             id: t.id,
             name: t.name || t.teamName || 'Unknown Team',
@@ -61,33 +65,46 @@ export default function Hero() {
         <div className={`text-center mb-16 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-[var(--rl-gold)]/10 border border-[var(--rl-gold)]/20 backdrop-blur-md mb-6 shadow-[0_0_20px_-5px_var(--rl-gold)]/30">
             <Star className="w-4 h-4 text-[var(--rl-gold)] fill-current animate-spin-slow" />
-            <span className="text-sm font-bold text-[var(--rl-gold)] tracking-widest uppercase">Ramadan Football League 2026</span>
+            <span className="text-sm font-bold text-[var(--rl-gold)] tracking-widest uppercase">
+              {config?.heroSubtitle || 'Ramadan Football League 2026'}
+            </span>
           </div>
           <h1 className="font-display font-black text-6xl md:text-8xl lg:text-9xl text-white tracking-tighter leading-[0.9]">
-            <span className="block text-transparent bg-clip-text bg-gradient-to-b from-white to-[var(--rl-gray)]">RAMADAN</span>
-            <span className="block text-gold-gradient drop-shadow-[0_0_30px_rgba(212,175,55,0.4)]">LEAGUE</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-b from-white to-[var(--rl-gray)]">
+              {config?.heroTitle1 || 'RAMADAN'}
+            </span>
+
+            {config?.heroTitle2 && (
+              <span className="block text-transparent bg-clip-text bg-gradient-to-b from-[var(--rl-gold)] to-[var(--rl-gold-dark)] text-4xl md:text-6xl lg:text-7xl my-2">
+                {config.heroTitle2}
+              </span>
+            )}
+
+            <span className="block text-gold-gradient drop-shadow-[0_0_30px_rgba(212,175,55,0.4)]">
+              {config?.heroTitle3 || 'LEAGUE'}
+            </span>
           </h1>
         </div>
 
-        {/* Central Bracket Visualization */}
-        <div className={`w-full grid grid-cols-1 md:grid-cols-3 gap-8 items-center mb-20 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+        {/* Central Bracket Visualization - FORCED HORIZONTAL ROW */}
+        <div className={`w-full flex flex-row items-center justify-between gap-2 sm:gap-4 md:gap-8 mb-12 sm:mb-20 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
 
           {/* Left Column (Teams) */}
-          <div className="flex flex-col gap-6 items-end">
+          <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-6 items-end">
             {[0, 1, 2].map(i => (
-              <div key={i} className="group relative w-full max-w-xs p-4 rounded-xl glass hover:border-[var(--rl-gold)]/50 transition-all cursor-pointer flex items-center gap-4 justify-end transform hover:-translate-x-2">
-                <div className="text-right">
-                  <div className="font-bold text-white group-hover:text-[var(--rl-gold)] transition-colors font-display tracking-wide">{teams[i]?.name || 'Waiting...'}</div>
-                  <div className="text-xs text-[var(--rl-gray)] uppercase tracking-wider">Cohort A</div>
+              <div key={i} className="group relative w-full p-2 sm:p-4 rounded-xl glass hover:border-[var(--rl-gold)]/50 transition-all cursor-pointer flex items-center gap-2 sm:gap-4 justify-end transform hover:-translate-x-2">
+                <div className="text-right min-w-0 flex-1">
+                  <div className="font-bold text-white text-[10px] sm:text-base truncate group-hover:text-[var(--rl-gold)] transition-colors font-display tracking-wide">{teams[i]?.name || 'Waiting...'}</div>
+                  <div className="text-[8px] sm:text-xs text-[var(--rl-gray)] uppercase tracking-wider truncate">Cohort A</div>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-[var(--rl-navy-light)] flex items-center justify-center border border-white/10 group-hover:border-[var(--rl-gold)] group-hover:shadow-[0_0_15px_var(--rl-gold)]/40 transition-all relative overflow-hidden">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 flex-shrink-0 rounded-lg sm:rounded-xl bg-[var(--rl-navy-light)] flex items-center justify-center border border-white/10 group-hover:border-[var(--rl-gold)] group-hover:shadow-[0_0_15px_var(--rl-gold)]/40 transition-all relative overflow-hidden">
                   {/* Team Logo or Initial */}
                   {teams[i]?.logo ?
                     <img src={teams[i]?.logo} className="w-full h-full object-cover" alt={teams[i]?.name} /> :
-                    <span className="text-[var(--rl-gold)] font-bold text-lg">{teams[i]?.shortName?.[0] || '?'}</span>
+                    <span className="text-[var(--rl-gold)] font-bold text-sm sm:text-lg">{teams[i]?.shortName?.[0] || '?'}</span>
                   }
                 </div>
-                {/* Circuit Line (Left) */}
+                {/* Circuit Line (Left) - Hidden on mobile */}
                 <div className="absolute right-[-40px] top-1/2 w-10 h-[2px] bg-[var(--rl-gold)]/20 hidden md:block">
                   <div className="absolute right-0 top-[-3px] w-2 h-2 rounded-full bg-[var(--rl-gold)] shadow-[0_0_10px_var(--rl-gold)]" />
                 </div>
@@ -95,18 +112,18 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Center Trophy Node */}
-          <div className="flex flex-col items-center justify-center relative">
-            <div className="w-48 h-48 md:w-64 md:h-64 relative flex items-center justify-center">
+          {/* Center Trophy Node - Scaled down on mobile */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center relative scale-50 sm:scale-100 -mx-4 sm:mx-0">
+            <div className="w-32 h-32 md:w-64 md:h-64 relative flex items-center justify-center">
               {/* Rotating Rings */}
               <div className="absolute inset-0 rounded-full border border-[var(--rl-gold)]/20 animate-spin-slow-reverse" />
               <div className="absolute inset-4 rounded-full border border-[var(--rl-gold)]/40 border-dashed animate-spin-slow" />
               <div className="absolute inset-0 bg-[var(--rl-gold)]/5 rounded-full blur-3xl animate-pulse" />
 
               {/* Central Hexagon/Trophy Container */}
-              <div className="relative z-10 p-8 rounded-2xl bg-gradient-to-br from-[var(--rl-gold)] to-[var(--rl-gold-dark)] shadow-[0_0_60px_rgba(212,175,55,0.6)] rotate-45 transform hover:scale-110 transition-transform duration-500">
+              <div className="relative z-10 p-4 md:p-8 rounded-2xl bg-gradient-to-br from-[var(--rl-gold)] to-[var(--rl-gold-dark)] shadow-[0_0_60px_rgba(212,175,55,0.6)] rotate-45 transform hover:scale-110 transition-transform duration-500">
                 <div className="-rotate-45">
-                  <Trophy className="w-20 h-20 md:w-24 md:h-24 text-[var(--rl-navy)] drop-shadow-lg" />
+                  <Trophy className="w-12 h-12 md:w-24 md:h-24 text-[var(--rl-navy)] drop-shadow-lg" />
                 </div>
               </div>
             </div>
@@ -116,23 +133,23 @@ export default function Hero() {
           </div>
 
           {/* Right Column (Teams) */}
-          <div className="flex flex-col gap-6 items-start">
+          <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-6 items-start">
             {[3, 4, 5].map(i => (
-              <div key={i} className="group relative w-full max-w-xs p-4 rounded-xl glass hover:border-[var(--rl-gold)]/50 transition-all cursor-pointer flex items-center gap-4 transform hover:translate-x-2">
-                {/* Circuit Line (Right) */}
+              <div key={i} className="group relative w-full p-2 sm:p-4 rounded-xl glass hover:border-[var(--rl-gold)]/50 transition-all cursor-pointer flex items-center gap-2 sm:gap-4 transform hover:translate-x-2">
+                {/* Circuit Line (Right) - Hidden on mobile */}
                 <div className="absolute left-[-40px] top-1/2 w-10 h-[2px] bg-[var(--rl-gold)]/20 hidden md:block">
                   <div className="absolute left-0 top-[-3px] w-2 h-2 rounded-full bg-[var(--rl-gold)] shadow-[0_0_10px_var(--rl-gold)]" />
                 </div>
 
-                <div className="w-12 h-12 rounded-xl bg-[var(--rl-navy-light)] flex items-center justify-center border border-white/10 group-hover:border-[var(--rl-gold)] group-hover:shadow-[0_0_15px_var(--rl-gold)]/40 transition-all relative overflow-hidden">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 flex-shrink-0 rounded-lg sm:rounded-xl bg-[var(--rl-navy-light)] flex items-center justify-center border border-white/10 group-hover:border-[var(--rl-gold)] group-hover:shadow-[0_0_15px_var(--rl-gold)]/40 transition-all relative overflow-hidden">
                   {teams[i]?.logo ?
                     <img src={teams[i]?.logo} className="w-full h-full object-cover" alt={teams[i]?.name} /> :
-                    <span className="text-[var(--rl-gold)] font-bold text-lg">{teams[i]?.shortName?.[0] || '?'}</span>
+                    <span className="text-[var(--rl-gold)] font-bold text-sm sm:text-lg">{teams[i]?.shortName?.[0] || '?'}</span>
                   }
                 </div>
-                <div className="text-left">
-                  <div className="font-bold text-white group-hover:text-[var(--rl-gold)] transition-colors font-display tracking-wide">{teams[i]?.name || 'Waiting...'}</div>
-                  <div className="text-xs text-[var(--rl-gray)] uppercase tracking-wider">Cohort B</div>
+                <div className="text-left min-w-0 flex-1">
+                  <div className="font-bold text-white text-[10px] sm:text-base truncate group-hover:text-[var(--rl-gold)] transition-colors font-display tracking-wide">{teams[i]?.name || 'Waiting...'}</div>
+                  <div className="text-[8px] sm:text-xs text-[var(--rl-gray)] uppercase tracking-wider truncate">Cohort B</div>
                 </div>
               </div>
             ))}
