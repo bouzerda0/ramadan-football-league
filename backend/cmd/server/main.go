@@ -62,6 +62,10 @@ func main() {
 		api.GET("/standings", handlers.GetStandings)
 		// api.GET("/stats", handlers.GetLeagueStats)
 
+		// Public Moments (Fetch only)
+		api.GET("/moments", handlers.GetMoments)
+		// api.POST("/moments/upload", handlers.UploadMoment) // Disabled public upload
+
 		// Public Registration
 		api.POST("/register", handlers.RegisterTeam)
 
@@ -94,6 +98,12 @@ func main() {
 			protected.POST("/players", handlers.CreatePlayer)
 			protected.PUT("/players/:id", handlers.UpdatePlayer)
 			protected.DELETE("/players/:id", handlers.DeletePlayer)
+
+			// Moments Management
+			protected.GET("/moments", handlers.GetAdminMoments)
+			protected.POST("/moments", handlers.AdminUploadMoment) // Admin Upload
+			protected.PUT("/moments/:id/status", handlers.UpdateMomentStatus)
+			protected.DELETE("/moments/:id", handlers.DeleteMoment) // Admin Delete
 		}
 	}
 
