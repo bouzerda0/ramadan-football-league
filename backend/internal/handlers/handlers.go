@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"ramadan-league/internal/database"
@@ -378,8 +379,14 @@ func AdminLogin(c *gin.Context) {
 
 	// Simple authentication (in production, use proper auth)
 	if req.Username == "admin" && req.Password == "admin123" {
-		c.SetCookie("admin_token", "secret-admin-token", 3600, "/", "", false, false)
-		success(c, gin.H{"message": "Login successful"})
+		token := "secret-admin-token"
+		// Set cookie for legacy support
+		c.SetCookie("admin_token", token, 3600, "/", "", false, false)
+		// Return token in JSON
+		success(c, gin.H{
+			"message": "Login successful",
+			"token":   token,
+		})
 		return
 	}
 
@@ -971,8 +978,23 @@ func ResetMatches(c *gin.Context) {
 // AdminMiddleware checks admin authentication
 func AdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token, err := c.Cookie("admin_token")
-		if err != nil || token != "secret-admin-token" {
+		token := ""
+
+		// 1. Check Authorization Header (Bearer Token)
+		authHeader := c.GetHeader("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+
+		// 2. Fallback to Cookie
+		if token == "" {
+			cookieToken, err := c.Cookie("admin_token")
+			if err == nil {
+				token = cookieToken
+			}
+		}
+
+		if token != "secret-admin-token" {
 			c.JSON(http.StatusUnauthorized, models.APIResponse{
 				Success: false,
 				Error:   "Unauthorized",

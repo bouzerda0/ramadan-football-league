@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Trash2, Clock, ImageIcon, Upload, Plus } from 'lucide-react';
-import { API_URL } from '@/lib/api';
+import { API_URL, getAuthHeaders } from '@/lib/api';
 
 interface Moment {
     id: string;
@@ -23,7 +23,7 @@ export default function AdminMoments() {
 
     const fetchMoments = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/admin/moments`);
+            const response = await fetch(`${API_URL}/api/admin/moments`, { headers: getAuthHeaders() });
             if (response.ok) {
                 const json = await response.json();
                 setMoments(json.data || []);
@@ -41,6 +41,7 @@ export default function AdminMoments() {
         try {
             const response = await fetch(`${API_URL}/api/admin/moments/${id}`, {
                 method: 'DELETE',
+                headers: getAuthHeaders(),
             });
 
             if (response.ok) {
@@ -71,6 +72,9 @@ export default function AdminMoments() {
         try {
             const response = await fetch(`${API_URL}/api/admin/moments`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
                 body: formData,
             });
 

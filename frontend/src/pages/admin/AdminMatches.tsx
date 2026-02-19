@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/lib/api';
+import { API_URL, getAuthHeaders } from '@/lib/api';
 import { Plus, Save, Trash2, Edit, Calendar, X, Trophy, Clock, MapPin } from 'lucide-react';
 
 interface MatchEvent {
@@ -100,8 +100,8 @@ export default function AdminMatches() {
     const fetchData = async () => {
         try {
             const [matchesRes, teamsRes] = await Promise.all([
-                fetch(`${API_URL}/api/admin/matches`),
-                fetch(`${API_URL}/api/admin/teams`),
+                fetch(`${API_URL}/api/admin/matches`, { headers: getAuthHeaders() }),
+                fetch(`${API_URL}/api/admin/teams`, { headers: getAuthHeaders() }),
             ]);
 
             if (matchesRes.ok) {
@@ -134,7 +134,7 @@ export default function AdminMatches() {
         try {
             const response = await fetch(`${API_URL}/api/admin/matches`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(newMatch),
             });
             if (response.ok) {
@@ -158,7 +158,7 @@ export default function AdminMatches() {
         try {
             const response = await fetch(`${API_URL}/api/admin/matches/${selectedMatch.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(selectedMatch),
             });
             if (response.ok) {
@@ -181,6 +181,7 @@ export default function AdminMatches() {
         try {
             const response = await fetch(`${API_URL}/api/admin/matches/${selectedMatch.id}`, {
                 method: 'DELETE',
+                headers: getAuthHeaders(),
             });
             if (response.ok) {
                 fetchData();

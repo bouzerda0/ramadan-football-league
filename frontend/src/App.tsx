@@ -14,6 +14,7 @@ import AdminPlayers from '@/pages/admin/AdminPlayers';
 import AdminMoments from '@/pages/admin/AdminMoments';
 import Settings from '@/pages/admin/Settings';
 import { SiteConfigProvider } from '@/context/SiteConfigContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 function App() {
   return (
@@ -29,13 +30,17 @@ function App() {
 
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="teams" element={<AdminTeams />} />
-                <Route path="players" element={<AdminPlayers />} />
-                <Route path="matches" element={<AdminMatches />} />
-                <Route path="moments" element={<AdminMoments />} />
-                <Route path="settings" element={<Settings />} />
+
+              <Route element={<ProtectedRoute />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="teams" element={<AdminTeams />} />
+                  <Route path="players" element={<AdminPlayers />} />
+                  <Route path="matches" element={<AdminMatches />} />
+                  <Route path="moments" element={<AdminMoments />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
               </Route>
             </Routes>
           </div>

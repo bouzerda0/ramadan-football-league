@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Save, Globe, Image, Trophy, RefreshCw } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
-import { API_URL } from '@/lib/api';
+import { API_URL, getAuthHeaders } from '@/lib/api';
 
 export default function Settings() {
     const { config, isLoading, refreshConfig, updateLocalConfig } = useSiteConfig();
@@ -34,13 +34,16 @@ export default function Settings() {
 
                 response = await fetch(`${API_URL}/api/admin/config`, {
                     method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                    },
                     body: formData,
                 });
             } else {
                 // Otherwise, JSON is fine
                 response = await fetch(`${API_URL}/api/admin/config`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(config),
                 });
             }

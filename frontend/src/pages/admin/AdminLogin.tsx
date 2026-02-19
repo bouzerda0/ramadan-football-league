@@ -30,8 +30,12 @@ export default function AdminLogin() {
             const data = await response.json();
 
             if (response.ok) {
-                // Set cookie client-side for the AdminLayout auth check
-                document.cookie = "admin_token=secret-admin-token; path=/";
+                // Store token for ProtectedRoute and API calls
+                const token = data.token || "secret-admin-token"; // Fallback until backend is updated
+                localStorage.setItem('admin_token', token);
+                // Also set cookie for legacy/backup (middleware might check both initially)
+                document.cookie = `admin_token=${token}; path=/; max-age=3600`;
+
                 navigate('/admin/dashboard');
             } else {
                 setError(data?.error || data?.message || 'Invalid credentials');

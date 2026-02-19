@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/lib/api';
+import { API_URL, getAuthHeaders } from '@/lib/api';
 import { getAssetUrl } from '@/lib/utils';
 import { Plus, Save, Trash2, Edit, Users, Trophy, X, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -78,7 +78,9 @@ export default function AdminTeams() {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/admin/teams`);
+            const response = await fetch(`${API_URL}/api/admin/teams`, {
+                headers: getAuthHeaders()
+            });
             if (response.ok) {
                 const result = await response.json();
                 // API returns { success: true, data: [...] }
@@ -121,6 +123,9 @@ export default function AdminTeams() {
         try {
             const response = await fetch(`${API_URL}/api/admin/teams`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
                 body: formData,
             });
             if (response.ok) {
@@ -143,7 +148,7 @@ export default function AdminTeams() {
         try {
             const response = await fetch(`${API_URL}/api/admin/teams/${selectedTeam.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(selectedTeam),
             });
             if (response.ok) {
@@ -164,6 +169,7 @@ export default function AdminTeams() {
         try {
             const response = await fetch(`${API_URL}/api/admin/teams/${selectedTeam.id}`, {
                 method: 'DELETE',
+                headers: getAuthHeaders(),
             });
             if (response.ok) {
                 fetchTeams();

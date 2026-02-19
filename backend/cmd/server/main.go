@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	// هام جدا: هذا باش يخدم SQLite بلا CGO فـ Railway
 )
 
 func main() {
@@ -21,7 +20,6 @@ func main() {
 		dbPath = "database.db"
 	}
 
-	// تأكد أن database.Init فالكود ديالك كتستعمل "sqlite" ماشي "sqlite3"
 	if err := database.Init(dbPath); err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
@@ -35,21 +33,17 @@ func main() {
 	// 4. CORS configuration (Fixed for 405 & Network Error)
 	config := cors.DefaultConfig()
 	// Allow specific origins for credentials support
-	config.AllowOrigins = []string{
-		"http://localhost:5173",
-		"http://localhost:5174", // Fallback if 5173 is busy
-		"http://127.0.0.1:5173",
-	}
+config.AllowOrigins = []string{
+    "http://localhost:5173", 
+    "https://app-production-f65a.up.railway.app",
+}
 
-	// ضروري تزيد هاد Methods كاملين باش Preflight يدوز
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 
-	// Headers ضرورية للـ Login
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Accept", "Authorization"}
 
 	config.AllowCredentials = true
 
-	// تطبيق الـ Middleware
 	r.Use(cors.New(config))
 
 	// 5. Public API routes
@@ -109,14 +103,13 @@ func main() {
 
 	// 6. Serve static files (Frontend)
 	distPath := ""
-	// كيقلب على فين كاين dossier dist
 	for _, candidate := range []string{
 		"./frontend/dist",
 		"../frontend/dist",
 		"../../frontend/dist",
 		"../../../frontend/dist",
-		"dist",               // زدنا هادي حيت مرات كيكون ديريكت
-		"/app/frontend/dist", // مسار Railway المطلق
+		"dist",
+		"/app/frontend/dist",
 	} {
 		if _, err := os.Stat(candidate); err == nil {
 			distPath = candidate
@@ -131,9 +124,7 @@ func main() {
 		r.Static("/assets", filepath.Join(distPath, "assets"))
 		r.StaticFile("/favicon.ico", filepath.Join(distPath, "favicon.ico"))
 
-		// أي رابط ما معروفش، صيفطو لـ index.html (SPA Fallback)
 		r.NoRoute(func(c *gin.Context) {
-			// إلا كان الطلب كيبدا بـ /api، رجع 404 (باش ما يرجعش html)
 			if len(c.Request.URL.Path) >= 4 && c.Request.URL.Path[:4] == "/api" {
 				c.JSON(404, gin.H{"error": "API route not found"})
 				return

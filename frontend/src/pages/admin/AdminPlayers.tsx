@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/lib/api';
+import { API_URL, getAuthHeaders } from '@/lib/api';
 import { Save, Search, TrendingUp, Shield, User, X, Plus } from 'lucide-react';
 
 interface Player {
@@ -59,7 +59,7 @@ export default function AdminPlayers() {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/admin/teams`);
+            const response = await fetch(`${API_URL}/api/admin/teams`, { headers: getAuthHeaders() });
             if (response.ok) {
                 const result = await response.json();
                 // API returns { success: true, data: [...] }
@@ -84,7 +84,7 @@ export default function AdminPlayers() {
         try {
             const response = await fetch(`${API_URL}/api/admin/players`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     teamId: selectedTeamId,
                     name: newPlayer.name,
@@ -110,7 +110,7 @@ export default function AdminPlayers() {
         try {
             const response = await fetch(`${API_URL}/api/admin/players/${playerId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     teamId,
                     ...editValues,
